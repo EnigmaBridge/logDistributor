@@ -1,0 +1,6 @@
+rootProject.name = 'logstashDistributor'
+include 'server'
+include 'distributor'
+include 'webServer'
+include 'tcpServer'
+
