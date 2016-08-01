@@ -24,6 +24,9 @@ dependencies {
     compile group: 'commons-dbutils', name: 'commons-dbutils', version: '1.2'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
 
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+
     // Testing
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
