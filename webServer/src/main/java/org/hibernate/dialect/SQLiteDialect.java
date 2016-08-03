@@ -7,6 +7,7 @@
  *    May you share freely, never taking more than you give.
  *
  * Based on dialect from net.kinetix package
+ * Inspiration: https://github.com/gwenn/sqlite-dialect
  *
  * @author Dusan Klinec (ph4r05)
  *
