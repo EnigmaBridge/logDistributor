@@ -5,9 +5,10 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'application'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -20,8 +21,36 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.5'
     compile 'org.springframework:spring-webmvc:4.1.6.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-aop'
 
-    compile project(':distributor')
+    compile 'org.json:json:20160212'
+    compile 'org.hjson:hjson:1.1.4'
+
+    compile 'org.springframework:spring-jdbc:3.2.0.RELEASE'
+    compile 'org.xerial:sqlite-jdbc:3.8.11'
+    compile group: 'commons-dbutils', name: 'commons-dbutils', version: '1.2'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+
+    compile 'commons-codec:commons-codec:1.4'
+    compile('commons-httpclient:commons-httpclient:3.1') {
+        exclude group: 'commons-logging'
+    }
+    compile 'commons-io:commons-io:2.4'
+
+    compile 'org.apache.httpcomponents:httpclient:4.3.4'
+    compile 'org.apache.httpcomponents:httpcore:4.0.1'
+
+    compile 'com.google.guava:guava:17.0'
+    compile 'joda-time:joda-time:2.4'
+    compile('net.sf.ehcache:ehcache-core:2.6.9') {
+        exclude group: 'commons-logging'
+    }
 
     // Testing
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -48,3 +77,10 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.3'
 }
 
+
+task generateKeyStore(type: Exec) {
+    workingDir "$projectDir"
+    commandLine '../createKeystore.sh'
+}
+
+tasks.bootRun.dependsOn(generateKeyStore);

@@ -1,0 +1,10 @@
+auth:
+    management:
+        tokens:
+            - a
+            - b
+    business:
+        tokens:
+            - f
+            - x
+
