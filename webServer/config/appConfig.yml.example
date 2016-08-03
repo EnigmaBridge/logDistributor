@@ -1,3 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:logger_config.sqlite
+    username:
+    password:
+
 auth:
     management:
         tokens:
