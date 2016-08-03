@@ -20,7 +20,6 @@ public class Client {
 
     @Column
     @OneToMany
-    @JoinColumn(name = "uoid")
     private List<UserObject> objects;
 
     public Integer getId() {
