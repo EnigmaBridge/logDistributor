@@ -20,6 +20,7 @@ import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.exception.*;
+import org.hibernate.exception.spi.SQLExceptionConversionDelegate;
 import org.hibernate.exception.spi.SQLExceptionConverter;
 import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtracter;
 import org.hibernate.exception.spi.ViolatedConstraintNameExtracter;
@@ -92,12 +93,6 @@ public class SQLiteDialect extends Dialect {
         return true;
     }
 
-  /*
-  public boolean supportsInsertSelectIdentity() {
-    return true; // As specified in NHibernate dialect
-  }
-  */
-
     @Override
     public boolean hasDataTypeInIdentityColumn() {
         return false; // As specified in NHibernate dialect
@@ -124,21 +119,6 @@ public class SQLiteDialect extends Dialect {
     }
 
     @Override
-    public boolean supportsLimit() {
-        return true;
-    }
-
-    @Override
-    public boolean bindLimitParametersInReverseOrder() {
-        return true;
-    }
-
-    @Override
-    protected String getLimitString(String query, boolean hasOffset) {
-        return query + (hasOffset ? " limit ? offset ?" : " limit ?");
-    }
-
-    @Override
     public boolean supportsTemporaryTables() {
         return true;
     }
@@ -152,13 +132,6 @@ public class SQLiteDialect extends Dialect {
     public Boolean performTemporaryTableDDLInIsolation() {
         return Boolean.FALSE;
     }
-
-  /*
-  @Override
-  public boolean dropTemporaryTableAfterUse() {
-    return true; // temporary tables are only dropped when the connection is closed. If the connection is pooled...
-  }
-  */
 
     @Override
     public boolean supportsCurrentTimestampSelection() {
@@ -187,9 +160,10 @@ public class SQLiteDialect extends Dialect {
     private static final int SQLITE_CONSTRAINT = 19;
     private static final int SQLITE_MISMATCH = 20;
     private static final int SQLITE_NOTADB = 26;
+
     @Override
-    public SQLExceptionConverter buildSQLExceptionConverter() {
-        return new SQLExceptionConverter() {
+    public SQLExceptionConversionDelegate buildSQLExceptionConversionDelegate() {
+        return new SQLExceptionConversionDelegate() {
             @Override
             public JDBCException convert(SQLException sqlException, String message, String sql) {
                 final int errorCode = org.hibernate.internal.util.JdbcExceptionHelper.extractErrorCode(sqlException);
