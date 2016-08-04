@@ -55,6 +55,14 @@ public class ManagementController {
         return resp;
     }
 
+    /**
+     * Sets the client record to the database.
+     * If client with same client id exists, it is removed and replaced with this new record.
+     * Dump can be imported back to the database in this way.
+     *
+     * @param addClientReq client records to add.
+     * @return response
+     */
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/add", method = RequestMethod.POST)
     public GeneralResponse addClient(@RequestBody AddClientsRequest addClientReq){
@@ -76,6 +84,13 @@ public class ManagementController {
         return new ResultResponse();
     }
 
+    /**
+     * Adds new UO to existing client record.
+     *
+     * @param clientId client id to add object to
+     * @param object object to add
+     * @return response
+     */
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject/{clientId}", method = RequestMethod.POST)
     public GeneralResponse addObject(@PathVariable(value = "clientId") String clientId,
@@ -146,6 +161,13 @@ public class ManagementController {
         }
     }
 
+    /**
+     * Updates existing client statistics forwarding configuration, preserving object list intact.
+     *
+     * @param clientId client id to update config to
+     * @param newClient new client configuration
+     * @return response
+     */
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/config/{clientId}", method = RequestMethod.POST)
     public GeneralResponse updateStatsConfig(@PathVariable(value = "clientId") String clientId,
