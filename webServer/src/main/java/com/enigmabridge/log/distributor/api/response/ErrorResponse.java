@@ -8,34 +8,30 @@ import org.json.JSONObject;
  * Created by dusanklinec on 01.08.16.
  */
 public class ErrorResponse extends GeneralResponse {
-    protected int errorCode = -1;
+    protected String errorCode;
     protected String error;
     protected JSONObject cause;
 
     public ErrorResponse() {
     }
 
-    public ErrorResponse(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
     public ErrorResponse(String error) {
-        this.errorCode = -1;
+        this.errorCode = "ERROR";
         this.error = error;
     }
 
-    public ErrorResponse(int errorCode, String error) {
-        this.errorCode = errorCode;
+    public ErrorResponse(String errorCode, String error) {
+        this.errorCode = "ERROR";
         this.error = error;
     }
 
-    public ErrorResponse(int errorCode, String error, JSONObject cause) {
+    public ErrorResponse(String errorCode, String error, JSONObject cause) {
         this.errorCode = errorCode;
         this.error = error;
         this.cause = cause;
     }
 
-    public int getErrorCode() {
+    public String getErrorCode() {
         return errorCode;
     }
 
@@ -47,7 +43,7 @@ public class ErrorResponse extends GeneralResponse {
         return cause;
     }
 
-    public ErrorResponse setErrorCode(int errorCode) {
+    public ErrorResponse setErrorCode(String errorCode) {
         this.errorCode = errorCode;
         return this;
     }
