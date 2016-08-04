@@ -185,10 +185,20 @@ public class ManagementController {
             }
 
             if (newClient.isLogstashConfigSet()){
+                final LogstashConfig oldConfig = client.getLogstashConfig();
+                if (oldConfig != null){
+                    client.setLogstashConfig(null);
+                    em.remove(oldConfig);
+                }
                 client.setLogstashConfig(clientBuilder.build(newClient.getLogstashConfig()));
             }
 
             if (newClient.isSplunkConfigSet()){
+                final SplunkConfig oldConfig = client.getSplunkConfig();
+                if (oldConfig != null){
+                    client.setSplunkConfig(null);
+                    em.remove(oldConfig);
+                }
                 client.setSplunkConfig(clientBuilder.build(newClient.getSplunkConfig()));
             }
 
