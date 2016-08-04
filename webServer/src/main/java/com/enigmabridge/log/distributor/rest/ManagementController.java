@@ -14,6 +14,7 @@ import com.enigmabridge.log.distributor.db.dao.SplunkConfigDao;
 import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
 import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
+import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,36 @@ public class ManagementController {
             } catch(Exception e){
                 LOG.error("Exception in adding client", e);
             }
+        }
+
+        return new ResultResponse();
+    }
+
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject/{clientId}", method = RequestMethod.POST)
+    public GeneralResponse addObject(@PathVariable(value = "clientId") String clientId,
+                                     @RequestBody UserObject object
+    ){
+        try {
+            final Client client = clientDao.findByClientId(clientId);
+            if (client == null){
+                return new ErrorResponse("Client not found");
+            }
+
+            // Already added?
+            final List<UserObject> objects = client.getObjects();
+            for (UserObject userObject : objects) {
+                if (userObject.equals(object)){
+                    return new ErrorResponse("Object already added");
+                }
+            }
+
+            // Add
+            client.getObjects().add(object);
+            clientDao.save(client);
+
+        } catch(Exception e){
+            LOG.error("Exception when adding object", e);
         }
 
         return new ResultResponse();
