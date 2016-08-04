@@ -9,6 +9,9 @@ curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/list
 # add UO to existing user
 curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/addObject/API_TEST' -d '{"apiKey":"API_TEST","uoType":12,"uoId":321}'
 
+# add UO automatically
+curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/addObject' -d '{"apiKey":"API_TEST","uoType":12,"uoId":321}'
+
 # removing UO from existing user
 curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/removeObject/API_TEST' -d '{"apiKey":"API_TEST","uoType":12,"uoId":321}'
 

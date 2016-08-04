@@ -11,6 +11,8 @@ import com.enigmabridge.log.distributor.db.ClientBuilder;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
 import com.enigmabridge.log.distributor.db.model.Client;
+import com.enigmabridge.log.distributor.db.model.LogstashConfig;
+import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +45,9 @@ public class ManagementController {
 
     @Autowired
     private ClientBuilder clientBuilder;
+
+    @Autowired
+    private EntityManager em;
 
     /**
      * Dumps the whole client configuration.
@@ -78,6 +85,7 @@ public class ManagementController {
                 final Client dbClient = clientBuilder.build(clientReq);
                 final List<Client> deletedClients = clientDao.deleteByClientId(clientId);
                 clientDao.save(dbClient);
+                // TODO: enqueue reload
 
             } catch(Exception e){
                 LOG.error("Exception in adding client", e);
@@ -117,6 +125,7 @@ public class ManagementController {
             // Add
             client.addObject(object);
             clientDao.save(client);
+            // TODO: enqueue reload
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
@@ -126,6 +135,60 @@ public class ManagementController {
         return new ResultResponse();
     }
 
+    /**
+     * Adds object to client that has same api key in records.
+     * This method is used when new UO was created but caller has no record which client it belongs to.
+     * Server goes through user object database and tries to find a client which has the same api key.
+     * The object is added to the client if only one client is using the same api key.
+     * TODO: If there are conflicts (more clients), object is added to that one which uses "catcher" UO =
+     * TODO: user object record with API key, uotype=-1, uoid=-1.
+     *
+     * @param object object to add
+     * @return response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject", method = RequestMethod.POST)
+    public GeneralResponse addObjectGuess(@RequestBody UserObject object){
+        try {
+            // Fetch all clients which have this api key.
+            final TypedQuery<Client> query = em.createQuery("SELECT uo.client" +
+                    " FROM UserObject uo" +
+                    " WHERE uo.apiKey = :apiKey GROUP BY uo.client", Client.class);
+            query.setParameter("apiKey", object.getApiKey());
+            final List<Client> matches = query.getResultList();
+
+            if (matches.size() > 1){
+                return new ErrorResponse("API key is used by more than 1 client, cannot add");
+            }
+
+            final Client client = matches.get(0);
+
+            // Duplicate detection
+            for (UserObject userObject : client.getObjects()) {
+                if (userObject.equals(object)){
+                    return new ErrorResponse("Object already added");
+                }
+            }
+
+            client.addObject(object);
+            clientDao.save(client);
+            // TODO: enqueue reload
+
+        } catch(Exception e){
+            LOG.error("Exception when adding object", e);
+            return new ErrorResponse("Exception");
+        }
+
+        return new ResultResponse();
+    }
+
+    /**
+     * Removes object from existing client record.
+     *
+     * @param clientId client to remove object from
+     * @param object object to remove
+     * @return response
+     */
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/removeObject/{clientId}", method = RequestMethod.POST)
     public GeneralResponse removeObject(@PathVariable(value = "clientId") String clientId,
@@ -204,13 +267,13 @@ public class ManagementController {
 
             clientDao.save(client);
             return new ResultResponse();
+            // TODO: enqueue reload
 
         } catch(Exception e){
             LOG.error("Exception when configuring stats settings", e);
             return new ErrorResponse("Exception");
         }
     }
-
 
 
 }
