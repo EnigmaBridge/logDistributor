@@ -150,6 +150,7 @@ public class ManagementController {
             if (modified){
                 clientDao.save(client);
                 return new ResultResponse();
+                // TODO: enqueue reload
 
             } else {
                 return new ErrorResponse("Object not found");
