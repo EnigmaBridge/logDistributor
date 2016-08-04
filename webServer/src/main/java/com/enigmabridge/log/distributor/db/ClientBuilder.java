@@ -66,7 +66,7 @@ public class ClientBuilder {
         }
 
         if (req.getEndpoint() != null){
-            ret.setToken(req.getToken());
+            ret.setEndpoint(req.getEndpoint());
         }
 
         if (req.getCaRoots() != null){
