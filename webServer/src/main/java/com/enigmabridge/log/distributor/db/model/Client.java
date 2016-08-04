@@ -27,7 +27,7 @@ public class Client {
     @OneToOne(cascade = CascadeType.ALL)
     private SplunkConfig splunkConfig;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client")
     private List<UserObject> objects;
 
     public Integer getId() {

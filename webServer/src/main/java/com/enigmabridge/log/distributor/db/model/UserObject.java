@@ -16,6 +16,10 @@ public class UserObject {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
     @NotNull
     @Column
     private String apiKey;
@@ -56,6 +60,14 @@ public class UserObject {
 
     public void setUoId(Integer uoId) {
         this.uoId = uoId;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     @Override
