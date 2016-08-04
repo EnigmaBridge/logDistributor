@@ -8,7 +8,9 @@ import java.util.List;
  * Created by dusanklinec on 03.08.16.
  */
 @Entity
-@Table()
+@Table(indexes = {
+        @Index(columnList = "clientId")
+})
 public class Client {
     @Id
     @Column

@@ -7,7 +7,9 @@ import javax.validation.constraints.NotNull;
  * Created by dusanklinec on 03.08.16.
  */
 @Entity
-@Table()
+@Table(indexes = {
+    @Index(columnList = "apiKey")
+})
 public class UserObject {
     @Id
     @Column
