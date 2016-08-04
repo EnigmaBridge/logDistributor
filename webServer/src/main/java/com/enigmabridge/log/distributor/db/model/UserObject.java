@@ -1,4 +1,4 @@
-package com.enigmabridge.log.distributor.model;
+package com.enigmabridge.log.distributor.db.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

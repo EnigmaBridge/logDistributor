@@ -1,4 +1,4 @@
-package com.enigmabridge.log.distributor.model;
+package com.enigmabridge.log.distributor.db.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -18,7 +18,12 @@ public class Client {
     @NotNull
     private String clientId;
 
-    @Column
+    @OneToOne
+    private LogstashConfig logstashConfig;
+
+    @OneToOne
+    private SplunkConfig splunkConfig;
+
     @OneToMany
     private List<UserObject> objects;
 
@@ -44,5 +49,21 @@ public class Client {
 
     public void setObjects(List<UserObject> objects) {
         this.objects = objects;
+    }
+
+    public LogstashConfig getLogstashConfig() {
+        return logstashConfig;
+    }
+
+    public void setLogstashConfig(LogstashConfig logstashConfig) {
+        this.logstashConfig = logstashConfig;
+    }
+
+    public SplunkConfig getSplunkConfig() {
+        return splunkConfig;
+    }
+
+    public void setSplunkConfig(SplunkConfig splunkConfig) {
+        this.splunkConfig = splunkConfig;
     }
 }
