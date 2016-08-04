@@ -1,5 +1,7 @@
 package com.enigmabridge.log.distributor.api.requests;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 /**
@@ -13,6 +15,12 @@ public class ClientReq {
     private SplunkConfigReq splunkConfig;
 
     private List<UserObjectReq> objects;
+
+    @JsonIgnore
+    private boolean logstashConfigSet=false;
+
+    @JsonIgnore
+    private boolean splunkConfigSet=false;
 
     public ClientReq() {
     }
@@ -31,6 +39,7 @@ public class ClientReq {
 
     public void setLogstashConfig(LogstashConfigReq logstashConfig) {
         this.logstashConfig = logstashConfig;
+        this.logstashConfigSet = true;
     }
 
     public SplunkConfigReq getSplunkConfig() {
@@ -39,6 +48,7 @@ public class ClientReq {
 
     public void setSplunkConfig(SplunkConfigReq splunkConfig) {
         this.splunkConfig = splunkConfig;
+        this.splunkConfigSet = true;
     }
 
     public List<UserObjectReq> getObjects() {
@@ -47,5 +57,15 @@ public class ClientReq {
 
     public void setObjects(List<UserObjectReq> objects) {
         this.objects = objects;
+    }
+
+    @JsonIgnore
+    public boolean isLogstashConfigSet() {
+        return logstashConfigSet;
+    }
+
+    @JsonIgnore
+    public boolean isSplunkConfigSet() {
+        return splunkConfigSet;
     }
 }
