@@ -35,12 +35,9 @@ public class ClientBuilder {
 
         final List<UserObjectReq> objects = req.getObjects();
         if (objects != null && !objects.isEmpty()){
-            final List<UserObject> uoList = new LinkedList<>();
             for (UserObjectReq object : objects) {
-                uoList.add(build(object));
+                cl.addObject(build(object));
             }
-
-            cl.setObjects(uoList);
         }
 
         return cl;

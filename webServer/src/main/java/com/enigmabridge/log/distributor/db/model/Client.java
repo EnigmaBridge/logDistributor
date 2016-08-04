@@ -2,6 +2,7 @@ package com.enigmabridge.log.distributor.db.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -47,7 +48,15 @@ public class Client {
     }
 
     public List<UserObject> getObjects() {
+        if (objects == null){
+            objects = new LinkedList<>();
+        }
         return objects;
+    }
+
+    public void addObject(UserObject uo){
+        getObjects().add(uo);
+        uo.setClient(this);
     }
 
     public void setObjects(List<UserObject> objects) {

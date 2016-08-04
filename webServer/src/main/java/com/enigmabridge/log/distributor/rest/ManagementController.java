@@ -9,6 +9,7 @@ import com.enigmabridge.log.distributor.api.response.GeneralResponse;
 import com.enigmabridge.log.distributor.api.response.ResultResponse;
 import com.enigmabridge.log.distributor.db.ClientBuilder;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
+import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
 import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class ManagementController {
 
     @Autowired
     private ClientDao clientDao;
+
+    @Autowired
+    private UserObjectDao userObjectDao;
 
     @Autowired
     private ClientBuilder clientBuilder;
@@ -111,7 +115,7 @@ public class ManagementController {
             }
 
             // Add
-            client.getObjects().add(object);
+            client.addObject(object);
             clientDao.save(client);
 
         } catch(Exception e){
@@ -142,13 +146,13 @@ public class ManagementController {
                 final UserObject cur = iterator.next();
                 if (cur.equals(object)){
                     iterator.remove();
+                    userObjectDao.delete(cur);
                     modified = true;
                     break;
                 }
             }
 
             if (modified){
-                clientDao.save(client);
                 return new ResultResponse();
                 // TODO: enqueue reload
 
