@@ -16,15 +16,16 @@ public class Client {
     private Integer id;
 
     @NotNull
+    @Column
     private String clientId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private LogstashConfig logstashConfig;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private SplunkConfig splunkConfig;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<UserObject> objects;
 
     public Integer getId() {
