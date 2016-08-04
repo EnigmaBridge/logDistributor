@@ -9,11 +9,7 @@ import com.enigmabridge.log.distributor.api.response.GeneralResponse;
 import com.enigmabridge.log.distributor.api.response.ResultResponse;
 import com.enigmabridge.log.distributor.db.ClientBuilder;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
-import com.enigmabridge.log.distributor.db.dao.LogstashConfigDao;
-import com.enigmabridge.log.distributor.db.dao.SplunkConfigDao;
-import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
 import com.enigmabridge.log.distributor.db.model.Client;
-import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,18 +37,6 @@ public class ManagementController {
 
     @Autowired
     private ClientBuilder clientBuilder;
-
-    /**
-     * Business controller calls this on new UO was created successfully
-     * @param uoHandle UO that was created
-     * @return response
-     */
-    @RequestMapping("/")
-    public GeneralResponse uoCreated(
-            @RequestParam() String uoHandle
-    ) {
-        return new ErrorResponse("Not implemented yet");
-    }
 
     /**
      * Dumps the whole client configuration.
@@ -84,6 +69,7 @@ public class ManagementController {
 
             } catch(Exception e){
                 LOG.error("Exception in adding client", e);
+                return new ErrorResponse("Exception");
             }
         }
 
@@ -115,9 +101,79 @@ public class ManagementController {
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
+            return new ErrorResponse("Exception");
         }
 
         return new ResultResponse();
     }
+
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/removeObject/{clientId}", method = RequestMethod.POST)
+    public GeneralResponse removeObject(@PathVariable(value = "clientId") String clientId,
+                                        @RequestBody UserObject object
+    ){
+        try {
+            final Client client = clientDao.findByClientId(clientId);
+            if (client == null){
+                return new ErrorResponse("Client not found");
+            }
+
+            // Already added?
+            final List<UserObject> objects = client.getObjects();
+            final Iterator<UserObject> iterator = objects.iterator();
+            boolean modified = false;
+
+            while(iterator.hasNext()){
+                final UserObject cur = iterator.next();
+                if (cur.equals(object)){
+                    iterator.remove();
+                    modified = true;
+                    break;
+                }
+            }
+
+            if (modified){
+                clientDao.save(client);
+                return new ResultResponse();
+
+            } else {
+                return new ErrorResponse("Object not found");
+            }
+
+        } catch(Exception e){
+            LOG.error("Exception when removing object", e);
+            return new ErrorResponse("Exception");
+        }
+    }
+
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/config/{clientId}", method = RequestMethod.POST)
+    public GeneralResponse updateStatsConfig(@PathVariable(value = "clientId") String clientId,
+                                             @RequestBody ClientReq newClient
+    ){
+        try {
+            final Client client = clientDao.findByClientId(clientId);
+            if (client == null){
+                return new ErrorResponse("Client not found");
+            }
+
+            if (newClient.isLogstashConfigSet()){
+                client.setLogstashConfig(clientBuilder.build(newClient.getLogstashConfig()));
+            }
+
+            if (newClient.isSplunkConfigSet()){
+                client.setSplunkConfig(clientBuilder.build(newClient.getSplunkConfig()));
+            }
+
+            clientDao.save(client);
+            return new ResultResponse();
+
+        } catch(Exception e){
+            LOG.error("Exception when configuring stats settings", e);
+            return new ErrorResponse("Exception");
+        }
+    }
+
+
 
 }
