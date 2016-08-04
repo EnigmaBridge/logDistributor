@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedList;
@@ -68,6 +69,7 @@ public class ManagementController {
         return resp;
     }
 
+    @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/add", method = RequestMethod.POST)
     public GeneralResponse addClient(@RequestBody AddClientsRequest addClientReq){
         final List<ClientReq> clientReqs = addClientReq.getClients();
