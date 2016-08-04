@@ -3,6 +3,8 @@ package com.enigmabridge.log.distributor.db.dao;
 import com.enigmabridge.log.distributor.db.model.Client;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
 /**
  * A DAO for the entity User is simply created by extending the CrudRepository
  * interface provided by spring. The following methods are some of the ones
@@ -14,7 +16,9 @@ public interface ClientDao extends CrudRepository<Client, Integer> {
     /**
      * Return the user having the passed clientId or null if no user is found.
      *
-     * @param clientId the client email.
+     * @param clientId the client ID.
      */
-    public Client findByClientId(String clientId);
+    Client findByClientId(String clientId);
+
+    List<Client> deleteByClientId(String clientId);
 }
