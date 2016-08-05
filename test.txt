@@ -3,6 +3,9 @@
 # Set the clients - old ones with given client ID will be removed
 curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/add' -d '{"clients":[{"clientId":"API_TEST", "splunkConfig": {"endpoint":"tcp://127.0.0.1:4000", "token": "abc", "caRoots": "---pem---", "verifyTls":true}, "objects":[{"apiKey":"API_TEST","uoType":12,"uoId":123},{"apiKey":"API_TEST","uoType":12,"uoId":321}]}]}'
 
+# Configuration from business server
+curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/business/configure' -d '{"clients":[{"clientid":"TEST","enabled":2,"clientapis":{"API_TEST":{"apikey":"API_TEST","use":[1152,1153,21896,21913,21930,30634,4660,30651,21828,21829,30668,30292,21845,34901,13398,30685,1120,1121,1122,1123,1124,1125,21862,1126,1127,1128,1129,1130,1131,1132,1133,1134,1135,1136,1137,1138,1139,1140,1141,39030,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151],"enabled":2,"manage":[]}}}]}'
+
 # dump current database
 curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/list'
 

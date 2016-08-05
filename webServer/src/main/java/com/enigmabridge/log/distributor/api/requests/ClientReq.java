@@ -10,6 +10,8 @@ import java.util.List;
 public class ClientReq {
     private String clientId;
 
+    private String domain;
+
     private LogstashConfigReq logstashConfig;
 
     private SplunkConfigReq splunkConfig;
@@ -57,6 +59,14 @@ public class ClientReq {
 
     public void setObjects(List<UserObjectReq> objects) {
         this.objects = objects;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     @JsonIgnore

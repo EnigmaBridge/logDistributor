@@ -22,6 +22,9 @@ public class Client {
     @Column
     private String clientId;
 
+    @Column
+    private String domain;
+
     @OneToOne(cascade = CascadeType.ALL)
     private LogstashConfig logstashConfig;
 
@@ -61,6 +64,11 @@ public class Client {
 
     public void setObjects(List<UserObject> objects) {
         this.objects = objects;
+        if (objects != null){
+            for (UserObject object : objects) {
+                object.setClient(this);
+            }
+        }
     }
 
     public LogstashConfig getLogstashConfig() {
@@ -77,5 +85,13 @@ public class Client {
 
     public void setSplunkConfig(SplunkConfig splunkConfig) {
         this.splunkConfig = splunkConfig;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

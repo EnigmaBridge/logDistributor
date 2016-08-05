@@ -24,6 +24,7 @@ public class ClientBuilder {
         final Client cl = new Client();
 
         cl.setClientId(req.getClientId());
+        cl.setDomain(req.getDomain());
 
         if (req.getLogstashConfig() != null){
             cl.setLogstashConfig(build(req.getLogstashConfig()));

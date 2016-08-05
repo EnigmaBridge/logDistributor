@@ -1,7 +1,6 @@
 package com.enigmabridge.log.distributor;
 
 import org.hjson.JsonValue;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**

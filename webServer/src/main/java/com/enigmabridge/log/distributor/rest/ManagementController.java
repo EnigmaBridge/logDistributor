@@ -14,6 +14,8 @@ import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +132,74 @@ public class ManagementController {
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
             return new ErrorResponse("Exception");
+        }
+
+        return new ResultResponse();
+    }
+
+    /**
+     * Accepts configuration from the business server.
+     *
+     * {"clients":[{"clientid":"TEST","enabled":2,"clientapis":{"API_TEST":{"apikey":"API_TEST","use":[1152,1153,21896,21913,21930,30634,4660,30651,21828,21829,30668,30292,21845,34901,13398,30685,1120,1121,1122,1123,1124,1125,21862,1126,1127,1128,1129,1130,1131,1132,1133,1134,1135,1136,1137,1138,1139,1140,1141,39030,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151],"enabled":2,"manage":[]}}}]}
+     *
+     * @return response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/business/configure", method = RequestMethod.POST)
+    public GeneralResponse configureClient(@RequestBody String jsonStr){
+        final String FIELD_CLIENTS = "clients";
+        final String FIELD_DOMAIN = "domain";
+        final String FIELD_CLIENT_ID = "clientid";
+        final String FIELD_CLIENT_API = "clientapis";
+        final String FIELD_API_KEY = "apikey";
+        final String FIELD_USE = "use";
+
+        try {
+            final JSONObject json = new JSONObject(jsonStr);
+            final String domain = json.has(FIELD_DOMAIN) ? json.getString(FIELD_DOMAIN) : null;
+            final JSONArray clientsArray = json.getJSONArray(FIELD_CLIENTS);
+            final int len = clientsArray.length();
+            for(int idx=0; idx<len; idx++){
+                final JSONObject cl = clientsArray.getJSONObject(idx);
+                final JSONObject apis = cl.getJSONObject(FIELD_CLIENT_API);
+
+                final Client clientModel = new Client();
+                clientModel.setDomain(domain);
+                clientModel.setClientId(cl.getString(FIELD_CLIENT_ID));
+
+                final Iterator<String> keyIt = apis.keys();
+                for(;keyIt.hasNext();){
+                    final String key = keyIt.next();
+                    final JSONObject apiObj = apis.getJSONObject(key);
+
+                    final String apiKey = apiObj.getString(FIELD_API_KEY);
+                    final JSONArray useArr = apiObj.getJSONArray(FIELD_USE);
+                    for(int idx2=0, ln2=useArr.length(); idx2<ln2; idx2++){
+                        final UserObject uo = new UserObject();
+                        uo.setApiKey(apiKey);
+                        uo.setClient(clientModel);
+                        uo.setUoId(useArr.getInt(idx2));
+                        clientModel.addObject(uo);
+                    }
+                }
+
+                // Exists in database? If yes, keep stats config.
+                final Client clientFromDb = clientDao.findByClientId(clientModel.getClientId());
+                if (clientFromDb != null){
+                    // Keep configuration of the existing client record. Delete all user objects - will be replaced by
+                    // new user object list. Only domain is updated.
+                    userObjectDao.delete(clientFromDb.getObjects());
+                    clientFromDb.setObjects(clientModel.getObjects());
+                    clientFromDb.setDomain(clientModel.getDomain());
+                    clientDao.save(clientFromDb);
+                } else {
+                    clientDao.save(clientModel);
+                }
+            }
+
+        } catch(Exception e){
+            LOG.error("Exception in parsing input data", e);
+            return new ErrorResponse("Exception in parsing input data");
         }
 
         return new ResultResponse();
