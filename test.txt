@@ -1,4 +1,5 @@
-{"clients":[{"clientId":"API_TEST", "splunkConfig": {"endpoint":"tcp://127.0.0.1:4000", "token": "abc", "caRoots": "---pem---", "verifyTls":true}, "objects":[{"apiKey":"API_TEST","uoType":12,"uoId":123},{"apiKey":"API_TEST","uoType":12,"uoId":321}]}]}
+# send logs from log server to distributor running locally
+sh -R 8998:localhost:8998 eblog-server
 
 # Set the clients - old ones with given client ID will be removed
 curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/add' -d '{"clients":[{"clientId":"API_TEST", "splunkConfig": {"endpoint":"tcp://127.0.0.1:4000", "token": "abc", "caRoots": "---pem---", "verifyTls":true}, "objects":[{"apiKey":"API_TEST","uoType":12,"uoId":123},{"apiKey":"API_TEST","uoType":12,"uoId":321}]}]}'
