@@ -1,4 +1,4 @@
-package com.enigmabridge.logDistributor;
+package com.enigmabridge.log.distributor;
 
 import org.hjson.JsonValue;
 import org.json.JSONException;
