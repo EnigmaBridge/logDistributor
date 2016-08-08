@@ -4,6 +4,7 @@ import com.enigmabridge.log.distributor.Utils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -23,6 +24,7 @@ import java.util.concurrent.Future;
  * Created by dusanklinec on 05.08.16.
  */
 @Component
+@Scope("prototype")
 public class LogInputProcessor extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputProcessor.class);
 
