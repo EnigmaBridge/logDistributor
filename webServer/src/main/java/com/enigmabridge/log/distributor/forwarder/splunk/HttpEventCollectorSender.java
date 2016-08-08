@@ -28,6 +28,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -184,27 +185,29 @@ final class HttpEventCollectorSender extends TimerTask implements HttpEventColle
     }
 
     private String serializeEventInfo(HttpEventCollectorEventInfo eventInfo) {
-//        // create event json content
-//        JSONObject event = new JSONObject();
-//        // event timestamp and metadata
-//        String index = metadata.get(MetadataIndexTag);
-//        String source = metadata.get(MetadataSourceTag);
-//        String sourceType = metadata.get(MetadataSourceTypeTag);
-//        event.put(MetadataTimeTag, String.format(Locale.US, "%.3f", eventInfo.getTime()));
-//        if (index != null && index.length() > 0)
-//            event.put(MetadataIndexTag, index);
-//        if (source  != null && source.length() > 0)
-//            event.put(MetadataSourceTag, source);
-//        if (sourceType  != null && sourceType.length() > 0)
-//            event.put(MetadataSourceTypeTag, sourceType);
-//        // event body
-//        JSONObject body = new JSONObject();
-//        body.put("severity", eventInfo.getSeverity());
-//        body.put("message", eventInfo.getMessage());
-//        // join event and body
-//        event.put("event", body);
-//        return event.toString();
-        return eventInfo.getMessage();
+        // create event json content
+        JSONObject event = new JSONObject();
+        // event timestamp and metadata
+        String index = metadata.get(MetadataIndexTag);
+        String source = metadata.get(MetadataSourceTag);
+        String sourceType = metadata.get(MetadataSourceTypeTag);
+        event.put(MetadataTimeTag, String.format(Locale.US, "%.3f", eventInfo.getTime()));
+        if (index != null && index.length() > 0)
+            event.put(MetadataIndexTag, index);
+        if (source  != null && source.length() > 0)
+            event.put(MetadataSourceTag, source);
+        if (sourceType  != null && sourceType.length() > 0)
+            event.put(MetadataSourceTypeTag, sourceType);
+        // event body
+        JSONObject body = new JSONObject(eventInfo.getMessage());
+
+        //body.put("severity", eventInfo.getSeverity());
+        //body.put("message", eventInfo.getMessage());
+
+        // join event and body
+        event.put("event", body);
+        return event.toString();
+        //return eventInfo.getMessage();
     }
 
     private void startHttpClient() {
