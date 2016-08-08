@@ -68,6 +68,10 @@ public class LogInputProcessor extends Thread {
             // Read lines from the connection.
             for(;parent.isRunning() && !clientSocket.isClosed() && !clientSocket.isInputShutdown();){
                 final String jsonLine = bufferedInput.readLine();
+                if (jsonLine == null){
+                    break;
+                }
+
                 try {
                     final JSONObject jsonObject = Utils.parseJSON(jsonLine);
                     if (!jsonObject.has(FIELD_DETAILS)){
