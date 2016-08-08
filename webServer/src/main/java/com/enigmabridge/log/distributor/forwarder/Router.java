@@ -61,7 +61,11 @@ public class Router {
                 routingDomain = newDomain();
             }
 
-            routingDomain.resync(cl);
+            try {
+                routingDomain.resync(cl);
+            } catch(Exception e){
+                LOG.error("Exception in loading client", e);
+            }
 
             if (!alreadyAdded){
                 domains.put(domain, routingDomain);

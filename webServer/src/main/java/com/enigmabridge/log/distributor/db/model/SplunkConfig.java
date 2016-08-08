@@ -79,4 +79,27 @@ public class SplunkConfig {
     public void setVerifyTls(Boolean verifyTls) {
         this.verifyTls = verifyTls;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SplunkConfig that = (SplunkConfig) o;
+
+        if (endpoint != null ? !endpoint.equals(that.endpoint) : that.endpoint != null) return false;
+        if (token != null ? !token.equals(that.token) : that.token != null) return false;
+        if (caRoots != null ? !caRoots.equals(that.caRoots) : that.caRoots != null) return false;
+        return verifyTls != null ? verifyTls.equals(that.verifyTls) : that.verifyTls == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = endpoint != null ? endpoint.hashCode() : 0;
+        result = 31 * result + (token != null ? token.hashCode() : 0);
+        result = 31 * result + (caRoots != null ? caRoots.hashCode() : 0);
+        result = 31 * result + (verifyTls != null ? verifyTls.hashCode() : 0);
+        return result;
+    }
 }
