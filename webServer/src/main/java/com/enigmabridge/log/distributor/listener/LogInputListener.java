@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor.listener;
 
+import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +55,9 @@ public class LogInputListener extends Thread {
     @Override
     public void run() {
         // Start the server.
+        ServerSocket listenSocket = null;
         try {
-            final ServerSocket listenSocket = (listenIp.equals(DEFAULT_HOST)) ?
+            listenSocket = (listenIp.equals(DEFAULT_HOST)) ?
                     new ServerSocket(listenPort) :
                     new ServerSocket(listenPort, DEFAULT_BACKLOG, InetAddress.getByName(listenIp));
             listenSocket.setSoTimeout(3000);
@@ -78,8 +80,10 @@ public class LogInputListener extends Thread {
             }
 
             LOG.info("Server shutting down");
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Listen exception", e);
+        } finally {
+            Utils.closeSilently(listenSocket);
         }
     }
 
