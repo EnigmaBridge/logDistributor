@@ -94,7 +94,7 @@ public class ManagementController {
                 final Client dbClient = clientBuilder.build(clientReq);
                 final List<Client> deletedClients = clientDao.deleteByClientId(clientId);
                 clientDao.save(dbClient);
-                router.reload();
+                router.reload(clientDao.findAll());
 
             } catch(Exception e){
                 LOG.error("Exception in adding client", e);
@@ -134,7 +134,7 @@ public class ManagementController {
             // Add
             client.addObject(object);
             clientDao.save(client);
-            router.reload();
+            router.reload(clientDao.findAll());
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
@@ -203,7 +203,7 @@ public class ManagementController {
                     clientDao.save(clientModel);
                 }
             }
-            router.reload();
+            router.reload(clientDao.findAll());
 
         } catch(Exception e){
             LOG.error("Exception in parsing input data", e);
@@ -250,7 +250,7 @@ public class ManagementController {
 
             client.addObject(object);
             clientDao.save(client);
-            router.reload();
+            router.reload(clientDao.findAll());
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
@@ -294,7 +294,7 @@ public class ManagementController {
             }
 
             if (modified){
-                router.reload();
+                router.reload(clientDao.findAll());
                 return new ResultResponse();
 
             } else {
@@ -344,7 +344,7 @@ public class ManagementController {
             }
 
             clientDao.save(client);
-            router.reload();
+            router.reload(clientDao.findAll());
             return new ResultResponse();
 
         } catch(Exception e){

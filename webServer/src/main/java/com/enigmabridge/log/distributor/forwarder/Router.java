@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor.forwarder;
 
+import com.enigmabridge.log.distributor.db.model.Client;
 import org.json.JSONObject;
 
 import java.util.concurrent.Future;
@@ -11,6 +12,9 @@ import java.util.concurrent.Future;
  */
 public interface Router {
     void processMessage(JSONObject jsonObject);
+
     Future<Integer> reload();
+    Future<Integer> reload(Iterable<Client> clients);
+
     void shutdown();
 }

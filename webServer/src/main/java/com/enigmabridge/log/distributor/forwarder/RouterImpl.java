@@ -52,11 +52,15 @@ public class RouterImpl implements Router {
         shutdown();
     }
 
-    @Async
     public Future<Integer> reload(){
+        final Iterable<Client> clients = clientDao.findAll();
+        return reload(clients);
+    }
+
+    @Async
+    public Future<Integer> reload(Iterable<Client> clients){
         LOG.info("Reloading router...");
 
-        final Iterable<Client> clients = clientDao.findAll();
         for(Client cl : clients){
             final String domain = getDomain(cl);
 
