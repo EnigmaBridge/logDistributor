@@ -13,17 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 /**
  * Created by dusanklinec on 08.08.16.
  */
-@Component
+@Service
 @DependsOn(value = ApiConfig.YAML_CONFIG)
 public class Router {
     private final static Logger LOG = LoggerFactory.getLogger(Router.class);
@@ -47,7 +51,8 @@ public class Router {
     }
 
     @Async
-    public void reload(){
+    @Transactional
+    public Future<Integer> reload(){
         LOG.info("Reloading router...");
 
         final Iterable<Client> clients = clientDao.findAll();
@@ -73,6 +78,7 @@ public class Router {
         }
 
         LOG.info("Router reloaded");
+        return new AsyncResult<Integer>(1);
     }
 
     /**

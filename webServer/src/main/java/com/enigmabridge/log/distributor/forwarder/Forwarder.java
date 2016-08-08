@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +42,7 @@ public class Forwarder {
      * @param client client to configure
      * @param uoidMap to register to
      */
-    public void init(Client client, Map<Integer, Forwarder> uoidMap) throws MalformedURLException {
+    public void init(Client client, Map<Integer, Forwarder> uoidMap) throws IOException {
         this.client = client;
         resync(client, uoidMap);
     }
@@ -53,7 +52,7 @@ public class Forwarder {
      * @param client client to configure
      * @param uoidMap to register to
      */
-    public void resync(Client client, Map<Integer, Forwarder> uoidMap) throws MalformedURLException {
+    public void resync(Client client, Map<Integer, Forwarder> uoidMap) throws IOException {
         final Client oldClient = this.client;
         this.client = client;
 
@@ -99,7 +98,11 @@ public class Forwarder {
 
         final Map<Integer, Forwarder> addMap = newUOs.stream()
                 .filter(uo -> !oldUOs.contains(uo))
-                .collect(Collectors.toMap(uo -> uo, uo -> this));
+                .collect(Collectors.toMap(uo -> uo, uo -> this,
+                        (fwd1, fwd2) -> {
+                            LOG.debug("Duplicate key found");
+                            return fwd1;
+                        }));
 
         for(Integer removedUo : removedUOs){
             uoidMap.remove(removedUo);
@@ -111,7 +114,11 @@ public class Forwarder {
     protected Map<Integer, Forwarder> getAddMap(){
         return client.getObjects().stream()
                 .map(UserObject::getUoId)
-                .collect(Collectors.toMap(e -> e, e -> this));
+                .collect(Collectors.toMap(e -> e, e -> this,
+                        (fwd1, fwd2) -> {
+                            LOG.debug("Duplicate key found");
+                            return fwd1;
+                        }));
     }
 
     protected boolean configurationDiffers(Client a, Client b){
@@ -139,7 +146,7 @@ public class Forwarder {
         }
     }
 
-    protected IClientForwarder buildHandler(Client cl) throws MalformedURLException{
+    protected IClientForwarder buildHandler(Client cl) throws IOException{
         if (cl == null){
             throw new NullPointerException("Client is null");
         }
@@ -157,10 +164,13 @@ public class Forwarder {
         return null;
     }
 
-    protected IClientForwarder buildHandler(SplunkConfig cfg) throws MalformedURLException {
-        final URL url = new URL(cfg.getEndpoint());
-        final String protocol = url.getProtocol();
-        if (protocol != null && "tcp".equals(protocol)){
+    protected IClientForwarder buildHandler(SplunkConfig cfg) throws IOException {
+        final String endpoint = cfg.getEndpoint();
+        if (endpoint == null || cfg.getToken() == null){
+            return null;
+        }
+
+        if (endpoint.startsWith("tcp://")){
             return null; // TODO: implement TCP
         }
 
@@ -168,7 +178,7 @@ public class Forwarder {
 
         return new EBSplunkHandler.Builder()
                 .setToken(cfg.getToken())
-                .setUrl(cfg.getEndpoint())
+                .setUrl(endpoint)
                 .setBatchCount(10)
                 .setDelay(5000)
                 .setRetriesOnError(4)

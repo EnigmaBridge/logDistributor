@@ -38,9 +38,6 @@ public class LogInputListener extends Thread {
     @Value("${listener.port}")
     protected int listenPort = 8999;
 
-    @Autowired
-    protected Router router;
-
     /**
      * Server is running flag.
      */
