@@ -18,6 +18,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * Takes care about forwarding message to a particular client connection.
+ * Configures forwarding connection for the client and updates connection
+ * on settings changes.
+ *
  * Created by dusanklinec on 08.08.16.
  */
 @Component

@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Encapsulates routing for one routing domain.
+ * In the routing domain UOIDs are unique and routing path based on the OUID can be found easily.
+ * Manages all clients in the same routing domain.
+ *
  * Created by dusanklinec on 08.08.16.
  */
 @Component

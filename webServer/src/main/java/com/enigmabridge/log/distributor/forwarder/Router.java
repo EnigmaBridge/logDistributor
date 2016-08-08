@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
+ * Routes messages to the destination described by current configuration.
+ *
  * Created by dusanklinec on 08.08.16.
  */
 @Service
