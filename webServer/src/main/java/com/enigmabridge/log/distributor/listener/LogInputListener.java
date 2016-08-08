@@ -2,6 +2,7 @@ package com.enigmabridge.log.distributor.listener;
 
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
+import com.enigmabridge.log.distributor.forwarder.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class LogInputListener extends Thread {
 
     @Value("${listener.port}")
     protected int listenPort = 8999;
+
+    @Autowired
+    protected Router router;
 
     /**
      * Server is running flag.

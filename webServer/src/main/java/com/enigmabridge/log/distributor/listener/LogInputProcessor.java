@@ -1,15 +1,17 @@
 package com.enigmabridge.log.distributor.listener;
 
+import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Utils;
+import com.enigmabridge.log.distributor.forwarder.Router;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Objects;
 import java.util.concurrent.Future;
 
 /**
@@ -28,10 +30,6 @@ import java.util.concurrent.Future;
 public class LogInputProcessor extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputProcessor.class);
 
-    private static final String FIELD_DETAILS = "details";
-    private static final String FIELD_CMD = "cmd";
-    private static final String FIELD_PROCESS = "process";
-
     protected InputStream input;
     protected BufferedReader bufferedInput;
     protected OutputStream output;
@@ -41,6 +39,8 @@ public class LogInputProcessor extends Thread {
     protected PrintStream printOut;
     protected String inputData;
 
+    @Autowired
+    protected Router router;
 
     public LogInputProcessor() {
     }
@@ -76,30 +76,30 @@ public class LogInputProcessor extends Thread {
 
                 try {
                     final JSONObject jsonObject = Utils.parseJSON(jsonLine);
-                    if (!jsonObject.has(FIELD_DETAILS)){
+                    if (!jsonObject.has(LogConstants.FIELD_DETAILS)){
                         continue;
                     }
 
-                    final Object detailsObj = jsonObject.get(FIELD_DETAILS);
+                    final Object detailsObj = jsonObject.get(LogConstants.FIELD_DETAILS);
                     if (!(detailsObj instanceof JSONObject)){
                         continue;
                     }
 
                     final JSONObject details = (JSONObject) detailsObj;
-                    if (!details.has(FIELD_CMD)){
+                    if (!details.has(LogConstants.FIELD_CMD)){
                         continue;
                     }
 
-                    final Object cmdObj = details.get(FIELD_CMD);
+                    final Object cmdObj = details.get(LogConstants.FIELD_CMD);
                     if (cmdObj == null || !(cmdObj instanceof String)){
                         continue;
                     }
 
-                    if (!FIELD_PROCESS.equalsIgnoreCase((String) cmdObj)){
+                    if (!LogConstants.FIELD_PROCESS.equalsIgnoreCase((String) cmdObj)){
                         continue;
                     }
 
-                    LOG.info(jsonLine);
+                    router.processMessage(jsonObject);
 
                 } catch(Exception e){
                     LOG.warn("Exception in parsing JSON line", e);
