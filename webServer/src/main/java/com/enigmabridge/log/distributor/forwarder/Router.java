@@ -3,16 +3,20 @@ package com.enigmabridge.log.distributor.forwarder;
 import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
-import com.enigmabridge.log.distributor.listener.LogInputProcessor;
+import com.enigmabridge.log.distributor.db.dao.ClientDao;
+import com.enigmabridge.log.distributor.db.model.Client;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,14 +33,42 @@ public class Router {
      */
     protected final Map<String, RoutingDomain> domains = new ConcurrentHashMap<>(8);
 
+    @Autowired
+    protected ClientDao clientDao;
+
     @PostConstruct
     public void init(){
         reload();
     }
 
+    @PreDestroy
+    public void deinit(){
+        shutdown();
+    }
+
     @Async
     public void reload(){
         LOG.info("Reloading router...");
+
+        final Iterable<Client> clients = clientDao.findAll();
+        for(Client cl : clients){
+            final String domain = getDomain(cl);
+
+            RoutingDomain routingDomain = domains.get(domain);
+            boolean alreadyAdded = routingDomain != null;
+
+            if (!alreadyAdded){
+                routingDomain = newDomain();
+            }
+
+            routingDomain.resync(cl);
+
+            if (!alreadyAdded){
+                domains.put(domain, routingDomain);
+            }
+        }
+
+        LOG.info("Router reloaded");
     }
 
     /**
@@ -50,22 +82,41 @@ public class Router {
             final String domain = getDomain(jsonObject);
 
             LOG.info("domain: {}, uoid: {}, line: {}", domain, uoid, jsonObject);
+            final RoutingDomain routingDomain = domains.get(domain);
+            if (routingDomain == null){
+                return;
+            }
 
+            routingDomain.forward(jsonObject);
 
         } catch(JSONException e){
             // Not a log message worth forwarding
         }
     }
 
-    protected int getUserObject(JSONObject msg){
+    public void shutdown(){
+        domains.entrySet().forEach(e -> e.getValue().shutdown());
+    }
+
+    @Lookup
+    protected RoutingDomain newDomain(){
+        return null;
+    }
+
+    public static int getUserObject(JSONObject msg){
         return Utils.getAsInteger(msg.getJSONObject(LogConstants.FIELD_DETAILS), LogConstants.FIELD_UO, 10);
     }
 
-    protected String getDomain(JSONObject msg){
+    public static String getDomain(Client client){
+        final String clDomain = client.getDomain();
+        return clDomain == null || clDomain.isEmpty() ? LogConstants.DEFAULT_DOMAIN : clDomain;
+    }
+
+    public static String getDomain(JSONObject msg){
         return getDomain(msg.getString(LogConstants.FIELD_SERVER));
     }
 
-    protected String getDomain(String server){
+    public static String getDomain(String server){
         final int separatorIdx = server.indexOf("_");
         if (separatorIdx == -1){
             return LogConstants.DEFAULT_DOMAIN;

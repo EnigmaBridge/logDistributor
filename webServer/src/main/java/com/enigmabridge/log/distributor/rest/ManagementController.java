@@ -14,6 +14,7 @@ import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
+import com.enigmabridge.log.distributor.forwarder.Router;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -47,6 +48,9 @@ public class ManagementController {
 
     @Autowired
     private ClientBuilder clientBuilder;
+
+    @Autowired
+    private Router router;
 
     @Autowired
     private EntityManager em;
@@ -87,7 +91,7 @@ public class ManagementController {
                 final Client dbClient = clientBuilder.build(clientReq);
                 final List<Client> deletedClients = clientDao.deleteByClientId(clientId);
                 clientDao.save(dbClient);
-                // TODO: enqueue reload
+                router.reload();
 
             } catch(Exception e){
                 LOG.error("Exception in adding client", e);
@@ -196,6 +200,7 @@ public class ManagementController {
                     clientDao.save(clientModel);
                 }
             }
+            router.reload();
 
         } catch(Exception e){
             LOG.error("Exception in parsing input data", e);
@@ -242,7 +247,7 @@ public class ManagementController {
 
             client.addObject(object);
             clientDao.save(client);
-            // TODO: enqueue reload
+            router.reload();
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);
@@ -286,8 +291,8 @@ public class ManagementController {
             }
 
             if (modified){
+                router.reload();
                 return new ResultResponse();
-                // TODO: enqueue reload
 
             } else {
                 return new ErrorResponse("Object not found");
@@ -336,8 +341,8 @@ public class ManagementController {
             }
 
             clientDao.save(client);
+            router.reload();
             return new ResultResponse();
-            // TODO: enqueue reload
 
         } catch(Exception e){
             LOG.error("Exception when configuring stats settings", e);
