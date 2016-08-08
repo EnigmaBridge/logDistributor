@@ -15,6 +15,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.Future;
  *
  * Created by dusanklinec on 08.08.16.
  */
-@Service
+@Component(value = ApiConfig.ROUTER)
 @DependsOn(value = ApiConfig.YAML_CONFIG)
 public class Router {
     private final static Logger LOG = LoggerFactory.getLogger(Router.class);
@@ -52,9 +53,9 @@ public class Router {
         shutdown();
     }
 
-    @Async
-    @Transactional
-    public Future<Integer> reload(){
+    //@Async
+//    public Future<Integer> reload(){
+    public void reload(){
         LOG.info("Reloading router...");
 
         final Iterable<Client> clients = clientDao.findAll();
@@ -80,7 +81,7 @@ public class Router {
         }
 
         LOG.info("Router reloaded");
-        return new AsyncResult<Integer>(1);
+        //return new AsyncResult<Integer>(1);
     }
 
     /**

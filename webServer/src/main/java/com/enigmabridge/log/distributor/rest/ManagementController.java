@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ import java.util.List;
  */
 @RestController
 @PreAuthorize("hasAuthority('"+ ApiConfig.MANAGEMENT_ROLE+"')")
+@DependsOn(ApiConfig.YAML_CONFIG)
 public class ManagementController {
     private final static Logger LOG = LoggerFactory.getLogger(ManagementController.class);
 
@@ -131,7 +133,7 @@ public class ManagementController {
             // Add
             client.addObject(object);
             clientDao.save(client);
-            // TODO: enqueue reload
+            router.reload();
 
         } catch(Exception e){
             LOG.error("Exception when adding object", e);

@@ -77,6 +77,7 @@ public class EBSplunkHandler implements IClientForwarder{
 
         @Override
         public EBSplunkHandler build() {
+            child.init();
             return child;
         }
 

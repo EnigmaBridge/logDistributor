@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -25,8 +26,8 @@ import java.net.SocketTimeoutException;
  *
  * Created by dusanklinec on 05.08.16.
  */
-@Service
-@DependsOn(value = ApiConfig.YAML_CONFIG)
+@Component
+@DependsOn(value = ApiConfig.ROUTER)
 public class LogInputListener extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputListener.class);
     public final static String DEFAULT_HOST = "localhost";
@@ -37,6 +38,9 @@ public class LogInputListener extends Thread {
 
     @Value("${listener.port}")
     protected int listenPort = 8999;
+
+    @Autowired
+    protected Router router;
 
     /**
      * Server is running flag.
@@ -92,6 +96,10 @@ public class LogInputListener extends Thread {
     public LogInputProcessor newProcessor(){
         //spring will override this method
         return null;
+    }
+
+    public Router getRouter() {
+        return router;
     }
 
     public void shutdownListener() {
