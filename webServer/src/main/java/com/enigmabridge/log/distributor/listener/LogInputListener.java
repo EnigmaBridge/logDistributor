@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor.listener;
 
+import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ import java.net.SocketTimeoutException;
  *
  * Created by dusanklinec on 05.08.16.
  */
-@DependsOn(value = "yaml-config")
 @Service
+@DependsOn(value = ApiConfig.YAML_CONFIG)
 public class LogInputListener extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputListener.class);
     public final static String DEFAULT_HOST = "localhost";

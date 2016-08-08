@@ -25,4 +25,6 @@ public class ApiConfig {
 
     public static final String BUSINESS_ROLE_SUFIX = "BUSINESS_ADMIN";
     public static final String BUSINESS_ROLE = "ROLE_" + BUSINESS_ROLE_SUFIX;
+
+    public static final String YAML_CONFIG = "yaml-config";
 }

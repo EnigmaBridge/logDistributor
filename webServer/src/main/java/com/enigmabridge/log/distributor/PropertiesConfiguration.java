@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor;
 
+import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +45,7 @@ class PropertiesConfiguration {
                 .collect(toMap(filename -> filename, this::loadProperties));
     }
 
-    @Bean(name = "yaml-config")
+    @Bean(name = ApiConfig.YAML_CONFIG)
     @DependsOn(value = "properties-config")
     public PropertySourcesPlaceholderConfigurer configFileLoad() {
         final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();

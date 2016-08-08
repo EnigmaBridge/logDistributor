@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor;
 
+import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
@@ -14,7 +15,7 @@ import java.io.File;
 public class ContainerConfiguration {
 
     @Bean
-    @DependsOn(value = "yaml-config")
+    @DependsOn(value = ApiConfig.YAML_CONFIG)
     EmbeddedServletContainerCustomizer containerCustomizer(
             @Value("${keystore.file}") String keystoreFile,
             @Value("${server.port}") final String serverPort,
