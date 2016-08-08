@@ -2,14 +2,15 @@ package com.enigmabridge.log.distributor.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.*;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,8 +22,8 @@ import java.net.SocketTimeoutException;
  *
  * Created by dusanklinec on 05.08.16.
  */
-@Component
 @DependsOn(value = "yaml-config")
+@Service
 public class LogInputListener extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputListener.class);
     public final static String DEFAULT_HOST = "localhost";
@@ -66,7 +67,8 @@ public class LogInputListener extends Thread {
                     LOG.debug("User connected: {}", clientSocket.getRemoteSocketAddress());
 
                     // Start new connection socket.
-                    final LogInputProcessor c = new LogInputProcessor(this, clientSocket);
+                    final LogInputProcessor c = newProcessor();
+                    c.init(this, clientSocket);
                     c.start();
 
                 } catch (SocketTimeoutException timeout) {
@@ -78,6 +80,12 @@ public class LogInputListener extends Thread {
         } catch (IOException e) {
             LOG.error("Listen exception", e);
         }
+    }
+
+    @Lookup
+    public LogInputProcessor newProcessor(){
+        //spring will override this method
+        return null;
     }
 
     public void shutdownListener() {

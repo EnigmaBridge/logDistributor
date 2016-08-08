@@ -4,6 +4,7 @@ import com.enigmabridge.log.distributor.Utils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,6 +22,7 @@ import java.util.concurrent.Future;
  *
  * Created by dusanklinec on 05.08.16.
  */
+@Component
 public class LogInputProcessor extends Thread {
     private final static Logger LOG = LoggerFactory.getLogger(LogInputProcessor.class);
 
@@ -37,7 +39,15 @@ public class LogInputProcessor extends Thread {
     protected PrintStream printOut;
     protected String inputData;
 
+
+    public LogInputProcessor() {
+    }
+
     public LogInputProcessor(LogInputListener parent, Socket aClientSocket) {
+        init(parent, aClientSocket);
+    }
+
+    public void init(LogInputListener parent, Socket aClientSocket){
         try {
             clientSocket = aClientSocket;
             input = clientSocket.getInputStream();
