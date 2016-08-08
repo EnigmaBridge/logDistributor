@@ -3,6 +3,7 @@ package com.enigmabridge.log.distributor.listener;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.forwarder.Router;
+import com.enigmabridge.log.distributor.forwarder.RouterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,9 @@ import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -38,9 +37,6 @@ public class LogInputListener extends Thread {
 
     @Value("${listener.port}")
     protected int listenPort = 8999;
-
-    @Autowired
-    protected Router router;
 
     /**
      * Server is running flag.
@@ -96,10 +92,6 @@ public class LogInputListener extends Thread {
     public LogInputProcessor newProcessor(){
         //spring will override this method
         return null;
-    }
-
-    public Router getRouter() {
-        return router;
     }
 
     public void shutdownListener() {

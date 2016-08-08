@@ -15,6 +15,7 @@ import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import com.enigmabridge.log.distributor.forwarder.Router;
+import com.enigmabridge.log.distributor.forwarder.RouterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;

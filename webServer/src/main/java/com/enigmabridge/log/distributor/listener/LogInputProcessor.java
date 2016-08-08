@@ -3,13 +3,13 @@ package com.enigmabridge.log.distributor.listener;
 import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.forwarder.Router;
+import com.enigmabridge.log.distributor.forwarder.RouterImpl;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.Socket;
@@ -40,6 +40,7 @@ public class LogInputProcessor extends Thread {
     protected PrintStream printOut;
     protected String inputData;
 
+    @Autowired
     protected Router router;
 
     public LogInputProcessor() {
@@ -56,7 +57,6 @@ public class LogInputProcessor extends Thread {
             bufferedInput = new BufferedReader(new InputStreamReader(input));
             output = clientSocket.getOutputStream();
             this.parent = parent;
-            this.router = parent.getRouter();
 
         } catch (IOException e) {
             LOG.error("Exception", e);

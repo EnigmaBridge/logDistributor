@@ -60,7 +60,7 @@ public class RoutingDomain {
      */
     public void forward(JSONObject msg){
         try {
-            final int uoid = Router.getUserObject(msg);
+            final int uoid = RouterImpl.getUserObject(msg);
             final Forwarder forwarder = uoidMap.get(uoid);
             if (forwarder == null){
                 return;
