@@ -1,9 +1,16 @@
+# Database
 spring:
   datasource:
     url: jdbc:sqlite:logger_config.sqlite
     username:
     password:
 
+# TCP JSON line listener (logstash input)
+listener:
+  host: localhost
+  port: 8998
+
+# Authentication tokens for API access.
 auth:
     management:
         tokens:
