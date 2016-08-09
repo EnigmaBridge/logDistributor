@@ -102,11 +102,7 @@ public class Forwarder {
 
         final Map<Integer, Forwarder> addMap = newUOs.stream()
                 .filter(uo -> !oldUOs.contains(uo))
-                .collect(Collectors.toMap(uo -> uo, uo -> this,
-                        (fwd1, fwd2) -> {
-                            LOG.debug("Duplicate key found");
-                            return fwd1;
-                        }));
+                .collect(Collectors.toMap(uo -> uo, uo -> this));
 
         for(Integer removedUo : removedUOs){
             uoidMap.remove(removedUo);
