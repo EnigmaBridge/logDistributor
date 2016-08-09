@@ -145,6 +145,53 @@ public class ManagementController {
     }
 
     /**
+     * Adds object to client that has same api key in records.
+     * This method is used when new UO was created but caller has no record which client it belongs to.
+     * Server goes through user object database and tries to find a client which has the same api key.
+     * The object is added to the client if only one client is using the same api key.
+     * TODO: If there are conflicts (more clients), object is added to that one which uses "catcher" UO =
+     * TODO: user object record with API key, uotype=-1, uoid=-1.
+     *
+     * @param object object to add
+     * @return response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject", method = RequestMethod.POST)
+    public GeneralResponse addObjectGuess(@RequestBody UserObject object){
+        try {
+            // Fetch all clients which have this api key.
+            final TypedQuery<Client> query = em.createQuery("SELECT uo.client" +
+                    " FROM UserObject uo" +
+                    " WHERE uo.apiKey = :apiKey GROUP BY uo.client", Client.class);
+            query.setParameter("apiKey", object.getApiKey());
+            final List<Client> matches = query.getResultList();
+
+            if (matches.size() > 1){
+                return new ErrorResponse("API key is used by more than 1 client, cannot add");
+            }
+
+            final Client client = matches.get(0);
+
+            // Duplicate detection
+            for (UserObject userObject : client.getObjects()) {
+                if (userObject.equals(object)){
+                    return new ErrorResponse("Object already added");
+                }
+            }
+
+            client.addObject(object);
+            clientDao.save(client);
+            router.reload(clientDao.findAll());
+
+        } catch(Exception e){
+            LOG.error("Exception when adding object", e);
+            return new ErrorResponse("Exception");
+        }
+
+        return new ResultResponse();
+    }
+
+    /**
      * Accepts configuration from the business server.
      *
      * {"clients":[{"clientid":"TEST","enabled":2,"clientapis":{"API_TEST":{"apikey":"API_TEST","use":[1152,1153,21896,21913,21930,30634,4660,30651,21828,21829,30668,30292,21845,34901,13398,30685,1120,1121,1122,1123,1124,1125,21862,1126,1127,1128,1129,1130,1131,1132,1133,1134,1135,1136,1137,1138,1139,1140,1141,39030,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151],"enabled":2,"manage":[]}}}]}
@@ -208,53 +255,6 @@ public class ManagementController {
         } catch(Exception e){
             LOG.error("Exception in parsing input data", e);
             return new ErrorResponse("Exception in parsing input data");
-        }
-
-        return new ResultResponse();
-    }
-
-    /**
-     * Adds object to client that has same api key in records.
-     * This method is used when new UO was created but caller has no record which client it belongs to.
-     * Server goes through user object database and tries to find a client which has the same api key.
-     * The object is added to the client if only one client is using the same api key.
-     * TODO: If there are conflicts (more clients), object is added to that one which uses "catcher" UO =
-     * TODO: user object record with API key, uotype=-1, uoid=-1.
-     *
-     * @param object object to add
-     * @return response
-     */
-    @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject", method = RequestMethod.POST)
-    public GeneralResponse addObjectGuess(@RequestBody UserObject object){
-        try {
-            // Fetch all clients which have this api key.
-            final TypedQuery<Client> query = em.createQuery("SELECT uo.client" +
-                    " FROM UserObject uo" +
-                    " WHERE uo.apiKey = :apiKey GROUP BY uo.client", Client.class);
-            query.setParameter("apiKey", object.getApiKey());
-            final List<Client> matches = query.getResultList();
-
-            if (matches.size() > 1){
-                return new ErrorResponse("API key is used by more than 1 client, cannot add");
-            }
-
-            final Client client = matches.get(0);
-
-            // Duplicate detection
-            for (UserObject userObject : client.getObjects()) {
-                if (userObject.equals(object)){
-                    return new ErrorResponse("Object already added");
-                }
-            }
-
-            client.addObject(object);
-            clientDao.save(client);
-            router.reload(clientDao.findAll());
-
-        } catch(Exception e){
-            LOG.error("Exception when adding object", e);
-            return new ErrorResponse("Exception");
         }
 
         return new ResultResponse();
