@@ -75,6 +75,18 @@ public class ManagementController {
         return resp;
     }
 
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/{clientId}", method = RequestMethod.DELETE)
+    public GeneralResponse deleteClient(@PathVariable(value = "clientId") String clientId){
+        try {
+            clientDao.deleteByClientId(clientId);
+            return new ResultResponse();
+        } catch(Exception e){
+            LOG.error("Exception when deleting the client", e);
+            return new ErrorResponse("Exception");
+        }
+    }
+
     /**
      * Sets the client record to the database.
      * If client with same client id exists, it is removed and replaced with this new record.
