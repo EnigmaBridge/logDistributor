@@ -1,5 +1,3 @@
 rootProject.name = 'logstashDistributor'
-include 'distributor'
 include 'webServer'
-include 'tcpServer'
 
