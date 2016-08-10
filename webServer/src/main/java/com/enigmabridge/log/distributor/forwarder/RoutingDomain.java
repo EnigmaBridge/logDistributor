@@ -1,6 +1,7 @@
 package com.enigmabridge.log.distributor.forwarder;
 
 import com.enigmabridge.log.distributor.db.model.Client;
+import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -10,8 +11,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulates routing for one routing domain.
@@ -37,10 +41,42 @@ public class RoutingDomain {
     protected final Map<Integer, Forwarder> uoidMap = new ConcurrentHashMap<>();
 
     /**
+     * Synchronizes all clients in this domain.
+     * Can remove clients not present in this batch.
+     *
+     * @param clients
+     * @param removeNotPresent
+     * @param lazy if false, connectors are reinitialized even if configuration didnt change
+     * @throws IOException
+     */
+    public void resync(Collection<Client> clients, boolean removeNotPresent, boolean lazy) throws IOException{
+        final Set<String> newClientIDs = clients.stream()
+                .map(Client::getClientId)
+                .collect(Collectors.toSet());
+
+        final Set<String> removedClientIDs = forwarders.keySet().stream()
+                .filter(e -> !newClientIDs.contains(e))
+                .collect(Collectors.toSet());
+
+        // Resync client by client. No optimization on this level.
+        for(Client cl : clients){
+            this.resync(cl, lazy);
+        }
+
+        // Unregister removed clients, shutdown their handlers.
+        for(String clId : removedClientIDs){
+            final Forwarder fwder = forwarders.remove(clId);
+            fwder.unregister(uoidMap);
+            fwder.shutdown();
+        }
+    }
+
+    /**
      * Resync forwarder mappings with given record.
      * @param client client record to reload
+     * @param lazy if false, connectors are reinitialized even if configuration didnt change
      */
-    public void resync(Client client) throws IOException {
+    public void resync(Client client, boolean lazy) throws IOException {
         final String clientId = client.getClientId();
         final Forwarder forwarder = forwarders.get(clientId);
         if (forwarder == null) {
@@ -51,7 +87,7 @@ public class RoutingDomain {
             return;
         }
 
-        forwarder.resync(client, uoidMap);
+        forwarder.resync(client, uoidMap, lazy);
     }
 
     /**

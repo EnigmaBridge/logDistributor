@@ -18,9 +18,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * Routes messages to the destination described by current configuration.
@@ -44,7 +45,7 @@ public class RouterImpl implements Router {
     @Async
     public void init(){
         // Will not be async - @Async required wrapping proxy to be used.
-        reload();
+        reload(false);
     }
 
     @PreDestroy
@@ -53,32 +54,79 @@ public class RouterImpl implements Router {
     }
 
     public Future<Integer> reload(){
-        final Iterable<Client> clients = clientDao.findAll();
-        return reload(clients);
+        return reload(true);
     }
 
+    public Future<Integer> reload(boolean lazy){
+        final Iterable<Client> clients = clientDao.findAll();
+        return reload(clients, lazy);
+    }
+
+    /**
+     * Reloads complete routing with the client records.
+     * The whole client database has to be provided.
+     *
+     * @param clients client database to use
+     * @return future to track progress.
+     */
     @Async
     public Future<Integer> reload(Iterable<Client> clients){
-        LOG.info("Reloading router...");
+        return this.reload(clients, true);
+    }
 
-        for(Client cl : clients){
-            final String domain = getDomain(cl);
+    /**
+     * Reloads complete routing with the client records.
+     * The whole client database has to be provided.
+     *
+     * @param clients client database to use
+     * @param lazy if false, connectors are reinitialized even if configuration didnt change
+     * @return future to track progress.
+     */
+    @Async
+    public Future<Integer> reload(Iterable<Client> clients, boolean lazy){
+        LOG.info("Reloading router[lazy={}]...", lazy);
+
+        final LinkedList<Client> clientList = new LinkedList<>();
+        clients.forEach(clientList::add);
+
+        // Group by clients by domain
+        final Map<String, List<Client>> clientsByDomain = clientList
+                .stream()
+                .collect(Collectors.groupingBy(RouterImpl::getDomain));
+
+        // Compute domains to remove from the mapping - removed from configuration.
+        final Set<String> removedDomains = new HashSet<>(domains.keySet());
+        removedDomains.removeAll(clientsByDomain.keySet());
+
+        // Process new client list, on the fly - with existing.
+        for (Map.Entry<String, List<Client>> entry : clientsByDomain.entrySet()) {
+            final String domain = entry.getKey();
+            final List<Client> clientListForDomain = entry.getValue();
 
             RoutingDomain routingDomain = domains.get(domain);
             boolean alreadyAdded = routingDomain != null;
+            removedDomains.remove(domain);
 
             if (!alreadyAdded){
                 routingDomain = newDomain();
             }
 
             try {
-                routingDomain.resync(cl);
+                routingDomain.resync(clientListForDomain, true, lazy);
             } catch(Exception e){
                 LOG.error("Exception in loading client", e);
             }
 
             if (!alreadyAdded){
                 domains.put(domain, routingDomain);
+            }
+        }
+
+        // Shutdown removed domains.
+        for(String domain : removedDomains){
+            final RoutingDomain routingDomain = domains.remove(domain);
+            if (routingDomain != null) {
+                routingDomain.shutdown();
             }
         }
 
@@ -125,7 +173,7 @@ public class RouterImpl implements Router {
 
     public static String getDomain(Client client){
         final String clDomain = client.getDomain();
-        return clDomain == null || clDomain.isEmpty() ? LogConstants.DEFAULT_DOMAIN : clDomain;
+        return clDomain == null || clDomain.isEmpty() ? LogConstants.DEFAULT_DOMAIN : clDomain.toLowerCase();
     }
 
     public static String getDomain(JSONObject msg){

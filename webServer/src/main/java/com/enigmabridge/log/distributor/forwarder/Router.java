@@ -14,7 +14,9 @@ public interface Router {
     void processMessage(JSONObject jsonObject);
 
     Future<Integer> reload();
+    Future<Integer> reload(boolean lazy);
     Future<Integer> reload(Iterable<Client> clients);
+    Future<Integer> reload(Iterable<Client> clients, boolean lazy);
 
     void shutdown();
 }

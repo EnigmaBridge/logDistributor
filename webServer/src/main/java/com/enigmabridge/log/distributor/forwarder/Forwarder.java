@@ -48,15 +48,16 @@ public class Forwarder {
      */
     public void init(Client client, Map<Integer, Forwarder> uoidMap) throws IOException {
         this.client = client;
-        resync(client, uoidMap);
+        resync(client, uoidMap, false);
     }
 
     /**
      * Resynchronizes forwarder with the client
      * @param client client to configure
      * @param uoidMap to register to
+     * @param lazy if true (default), connectors are reloaded only if config was changed from the last time.
      */
-    public void resync(Client client, Map<Integer, Forwarder> uoidMap) throws IOException {
+    public void resync(Client client, Map<Integer, Forwarder> uoidMap, boolean lazy) throws IOException {
         final Client oldClient = this.client;
         this.client = client;
 
@@ -65,7 +66,7 @@ public class Forwarder {
             // New configuration.
             this.clientForwarder = buildHandler(client);
 
-        } else if (configurationDiffers(client, oldClient)) {
+        } else if (configurationDiffers(client, oldClient) || !lazy) {
             if (clientForwarder != null){
                 try {
                     clientForwarder.shutdown();
@@ -109,6 +110,18 @@ public class Forwarder {
         }
 
         uoidMap.putAll(addMap);
+    }
+
+    /**
+     * Removes all binding on UOIDs from the given map.
+     * @param uoidMap map to unregister from.
+     */
+    public void unregister(Map<Integer, Forwarder> uoidMap){
+        this.client.getObjects()
+                .stream()
+                .map(UserObject::getUoId)
+                .filter(e -> this == uoidMap.get(e))
+                .forEach(uoidMap::remove);
     }
 
     protected Map<Integer, Forwarder> getAddMap(){

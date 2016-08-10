@@ -15,7 +15,6 @@ import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import com.enigmabridge.log.distributor.forwarder.Router;
-import com.enigmabridge.log.distributor.forwarder.RouterImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -59,6 +58,21 @@ public class ManagementController {
     private EntityManager em;
 
     /**
+     * Reloads current routing configuration.
+     * Restarts HTTP handlers.
+     *
+     * @return client response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/reload", method = RequestMethod.GET)
+    public GeneralResponse reload(
+            @RequestParam(required = false, value="lazy", defaultValue = "true") boolean lazy
+    ){
+        router.reload(clientDao.findAll(), lazy);
+        return new ResultResponse();
+    }
+
+    /**
      * Dumps the whole client configuration.
      * @return client response
      */
@@ -80,6 +94,8 @@ public class ManagementController {
     public GeneralResponse deleteClient(@PathVariable(value = "clientId") String clientId){
         try {
             clientDao.deleteByClientId(clientId);
+            router.reload(clientDao.findAll());
+
             return new ResultResponse();
         } catch(Exception e){
             LOG.error("Exception when deleting the client", e);
