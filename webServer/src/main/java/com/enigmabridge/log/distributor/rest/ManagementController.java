@@ -308,7 +308,7 @@ public class ManagementController {
      * @return response
      */
     @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/business/configure", method = RequestMethod.POST)
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/site/configure", method = RequestMethod.POST)
     public GeneralResponse processSiteDump(@RequestBody String jsonStr){
         final String FIELD_RESULT = "result";
         final String FIELD_DOMAIN = "domain";
