@@ -189,7 +189,7 @@ public class RouterImpl implements Router {
                 .orElse(Optional.empty());
 
         if (detailsDomain.isPresent()){
-            return detailsDomain.get();
+            return detailsDomain.get().toLowerCase();
         }
 
         return getDomain(msg.getString(LogConstants.FIELD_SERVER));
