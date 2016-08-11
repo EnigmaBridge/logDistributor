@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Record represents one client - domain mapping.
+ * There are more records in this table having clientId the same, but having different domain.
+ *
  * Created by dusanklinec on 03.08.16.
  */
 @Entity
@@ -22,8 +25,20 @@ public class Client {
     @Column
     private String clientId;
 
-    @Column
-    private String domain;
+    @ManyToOne(optional = false)
+    @JoinColumn(name="domain_id", nullable=false)
+    private Domain domain;
+
+    /**
+     * API keys configured for this client.
+     * Client can have some API keys configured from the management server
+     * yet have 0 UOs for now. For the case of event saying new UO was created
+     * on given domain with given API_KEY we can pair the UO to the client.
+     * Consistency between list of apiKeys and all api keys in objects array is
+     * not explicitly checked, but it should hold client.objects.apiKeys is subset of client.apiKeys.
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client", fetch = FetchType.EAGER)
+    private List<ApiKey2Client> apiKeys;
 
     @OneToOne(cascade = CascadeType.ALL)
     private LogstashConfig logstashConfig;
@@ -87,11 +102,22 @@ public class Client {
         this.splunkConfig = splunkConfig;
     }
 
-    public String getDomain() {
+    public Domain getDomain() {
         return domain;
     }
 
-    public void setDomain(String domain) {
+    public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    public List<ApiKey2Client> getApiKeys() {
+        if (apiKeys == null){
+            apiKeys = new LinkedList<>();
+        }
+        return apiKeys;
+    }
+
+    public void setApiKeys(List<ApiKey2Client> apiKeys) {
+        this.apiKeys = apiKeys;
     }
 }

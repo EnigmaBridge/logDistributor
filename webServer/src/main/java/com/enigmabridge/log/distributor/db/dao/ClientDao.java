@@ -1,6 +1,7 @@
 package com.enigmabridge.log.distributor.db.dao;
 
 import com.enigmabridge.log.distributor.db.model.Client;
+import com.enigmabridge.log.distributor.db.model.Domain;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -18,7 +19,11 @@ public interface ClientDao extends CrudRepository<Client, Integer> {
      *
      * @param clientId the client ID.
      */
-    Client findByClientId(String clientId);
+    List<Client> findByClientId(String clientId);
+
+    Client findByClientIdAndDomain(String clientId, Domain domain);
 
     List<Client> deleteByClientId(String clientId);
+
+    List<Client> deleteByClientIdAndDomain(String clientId, Domain domain);
 }

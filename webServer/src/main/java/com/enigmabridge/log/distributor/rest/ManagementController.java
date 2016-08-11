@@ -1,17 +1,17 @@
 package com.enigmabridge.log.distributor.rest;
 
+import com.enigmabridge.log.distributor.LogConstants;
+import com.enigmabridge.log.distributor.Server;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.api.requests.AddClientsRequest;
 import com.enigmabridge.log.distributor.api.requests.ClientReq;
 import com.enigmabridge.log.distributor.api.response.*;
 import com.enigmabridge.log.distributor.db.ClientBuilder;
+import com.enigmabridge.log.distributor.db.DbHelper;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
-import com.enigmabridge.log.distributor.db.model.Client;
-import com.enigmabridge.log.distributor.db.model.LogstashConfig;
-import com.enigmabridge.log.distributor.db.model.SplunkConfig;
-import com.enigmabridge.log.distributor.db.model.UserObject;
+import com.enigmabridge.log.distributor.db.model.*;
 import com.enigmabridge.log.distributor.forwarder.Router;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,6 +51,12 @@ public class ManagementController {
     private Router router;
 
     @Autowired
+    private Server server;
+
+    @Autowired
+    private DbHelper dbHelper;
+
+    @Autowired
     private EntityManager em;
 
     /**
@@ -86,22 +92,60 @@ public class ManagementController {
      */
     @RequestMapping(value = ApiConfig.API_PATH + "/client/list", method = RequestMethod.GET)
     public GeneralResponse dumpConfiguration(){
-        final Iterable<Client> clients = clientDao.findAll();
-        final ClientResponse resp = new ClientResponse();
-        resp.setClients(new LinkedList<>());
+        final ConfigResponse resp = new ConfigResponse();
 
-        for (Client client : clients) {
-            resp.getClients().add(client);
-        }
+        // Load clients
+        final List<Client> clientList = new LinkedList<>();
+        dbHelper.findAllClients().forEach(clientList::add);
 
+        // Load domains
+        final List<Domain> domainList = new LinkedList<>();
+        dbHelper.findAllDomains().forEach(domainList::add);
+
+        // Load hosts
+        final List<EBHost> hostList = new LinkedList<>();
+        dbHelper.findAllHosts().forEach(hostList::add);
+
+        resp.setClients(clientList);
+        resp.setDomains(domainList);
+        resp.setHosts(hostList);
         return resp;
     }
 
+    /**
+     * Deletes all clients with given client ID on all domains.
+     *
+     * @param clientId client ID records to delete
+     * @return response
+     */
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/{clientId}", method = RequestMethod.DELETE)
     public GeneralResponse deleteClient(@PathVariable(value = "clientId") String clientId){
         try {
             clientDao.deleteByClientId(clientId);
+            router.reload(clientDao.findAll());
+
+            return new ResultResponse();
+        } catch(Exception e){
+            LOG.error("Exception when deleting the client", e);
+            return new ErrorResponse("Exception");
+        }
+    }
+
+    /**
+     * Deletes all clients with given client ID on given domain.
+     *
+     * @param clientId client ID records to delete
+     * @return response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/{clientId}/{domain}", method = RequestMethod.DELETE)
+    public GeneralResponse deleteClientOnDomain(
+            @PathVariable(value = "clientId") String clientId,
+            @PathVariable(value = "domain") String domain
+    ){
+        try {
+            dbHelper.deleteClientsByClientIdAndDomain(clientId, domain);
             router.reload(clientDao.findAll());
 
             return new ResultResponse();
@@ -149,12 +193,13 @@ public class ManagementController {
      * @return response
      */
     @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject/{clientId}", method = RequestMethod.POST)
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/addObject/{clientId}/{domain}", method = RequestMethod.POST)
     public GeneralResponse addObject(@PathVariable(value = "clientId") String clientId,
+                                     @PathVariable(value = "domain") String domain,
                                      @RequestBody UserObject object
     ){
         try {
-            final Client client = clientDao.findByClientId(clientId);
+            final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
             }
@@ -256,7 +301,7 @@ public class ManagementController {
                 final JSONObject apis = cl.getJSONObject(FIELD_CLIENT_API);
 
                 final Client clientModel = new Client();
-                clientModel.setDomain(domain);
+                clientModel.setDomain(dbHelper.getDomain(domain));
                 clientModel.setClientId(cl.getString(FIELD_CLIENT_ID));
 
                 final Iterator<String> keyIt = apis.keys();
@@ -276,7 +321,7 @@ public class ManagementController {
                 }
 
                 // Exists in database? If yes, keep stats config.
-                final Client clientFromDb = clientDao.findByClientId(clientModel.getClientId());
+                final Client clientFromDb = dbHelper.findByClientIdAndDomain(clientModel.getClientId(), clientModel.getDomain());
                 if (clientFromDb != null){
                     // Keep configuration of the existing client record. Delete all user objects - will be replaced by
                     // new user object list. Only domain is updated.
@@ -328,7 +373,7 @@ public class ManagementController {
         // Domain -> ApiKey -> Client
         final Map<String, Map<String, Client>> domainApiClient = new HashMap<>();
         for (UserObject uo : query.getResultList()){
-            final String domain = uo.getClient().getDomain();
+            final String domain = uo.getClient().getDomain().getDomain();
             final String apiKey = uo.getApiKey();
 
             domainApiClient.putIfAbsent(domain, new HashMap<>());
@@ -386,12 +431,13 @@ public class ManagementController {
      * @return response
      */
     @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/removeObject/{clientId}", method = RequestMethod.POST)
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/removeObject/{clientId}/{domain}", method = RequestMethod.POST)
     public GeneralResponse removeObject(@PathVariable(value = "clientId") String clientId,
+                                        @PathVariable(value = "domain") String domain,
                                         @RequestBody UserObject object
     ){
         try {
-            final Client client = clientDao.findByClientId(clientId);
+            final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
             }
@@ -433,12 +479,13 @@ public class ManagementController {
      * @return response
      */
     @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/config/{clientId}", method = RequestMethod.POST)
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/config/{clientId}/{domain}", method = RequestMethod.POST)
     public GeneralResponse updateStatsConfig(@PathVariable(value = "clientId") String clientId,
+                                             @PathVariable(value = "domain") String domain,
                                              @RequestBody ClientReq newClient
     ){
         try {
-            final Client client = clientDao.findByClientId(clientId);
+            final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
             }
@@ -470,6 +517,5 @@ public class ManagementController {
             return new ErrorResponse("Exception");
         }
     }
-
 
 }

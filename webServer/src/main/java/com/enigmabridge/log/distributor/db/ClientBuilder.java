@@ -8,6 +8,7 @@ import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
@@ -20,11 +21,14 @@ import java.util.List;
  */
 @Component
 public class ClientBuilder {
+    @Autowired
+    private DbHelper dbHelper;
+
     public Client build(ClientReq req){
         final Client cl = new Client();
 
         cl.setClientId(req.getClientId());
-        cl.setDomain(req.getDomain());
+        cl.setDomain(dbHelper.getDomain(req.getDomain()));
 
         if (req.getLogstashConfig() != null){
             cl.setLogstashConfig(build(req.getLogstashConfig()));

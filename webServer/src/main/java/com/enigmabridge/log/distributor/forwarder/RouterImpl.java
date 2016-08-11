@@ -178,7 +178,7 @@ public class RouterImpl implements Router {
     }
 
     public static String getDomain(Client client){
-        final String clDomain = client.getDomain();
+        final String clDomain = client.getDomain().getDomain();
         return clDomain == null || clDomain.isEmpty() ? LogConstants.DEFAULT_DOMAIN : clDomain.toLowerCase();
     }
 
