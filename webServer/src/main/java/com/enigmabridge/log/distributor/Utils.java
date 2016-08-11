@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Closeable;
+import java.util.Map;
 
 /**
  * Created by dusanklinec on 31.07.16.
@@ -13,6 +14,18 @@ public class Utils {
     public static String convertStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
+    }
+
+    public static <K1, K2, T> T getMap(Map<K1, Map<K2, T>> map, K1 k1, K2 k2){
+        if (map == null){
+            return null;
+        }
+        final Map<K2, T> k2TMap = map.get(k1);
+        if (k2TMap == null){
+            return null;
+        }
+
+        return k2TMap.get(k2);
     }
 
     public static JSONObject parseJSON(String json){
