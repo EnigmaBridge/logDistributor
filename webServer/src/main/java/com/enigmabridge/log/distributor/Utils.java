@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.io.Closeable;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by dusanklinec on 31.07.16.
@@ -82,13 +83,33 @@ public class Utils {
      * @param key field name
      * @return extracted string
      */
-    public static String getAsStringOrNull(JSONObject json, String key) {
+    public static Optional<JSONObject> getAsJSON(JSONObject json, String key) {
         if (!json.has(key)){
-            return null;
+            return Optional.empty();
         }
 
         try {
-            return json.getString(key);
+            return Optional.ofNullable(json.getJSONObject(key));
+        } catch(JSONException e){
+            return null;
+        }
+    }
+
+    /**
+     * Tries to extract json parameter as a string.
+     * If parameter is not present or is not a string, null is returned.
+     *
+     * @param json target
+     * @param key field name
+     * @return extracted string
+     */
+    public static Optional<String> getAsString(JSONObject json, String key) {
+        if (!json.has(key)){
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.ofNullable(json.getString(key));
         } catch(JSONException e){
             return null;
         }

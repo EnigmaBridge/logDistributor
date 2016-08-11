@@ -183,6 +183,15 @@ public class RouterImpl implements Router {
     }
 
     public static String getDomain(JSONObject msg){
+        // {"details":{"domain":"ddd"}}
+        final Optional<String> detailsDomain = Utils.getAsJSON(msg, LogConstants.FIELD_DETAILS)
+                .map(e -> Utils.getAsString(e, LogConstants.FIELD_DOMAIN))
+                .orElse(Optional.empty());
+
+        if (detailsDomain.isPresent()){
+            return detailsDomain.get();
+        }
+
         return getDomain(msg.getString(LogConstants.FIELD_SERVER));
     }
 

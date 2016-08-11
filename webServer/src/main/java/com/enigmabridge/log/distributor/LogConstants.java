@@ -11,4 +11,5 @@ public class LogConstants {
     public static final String FIELD_PROCESS = "process";
     public static final String FIELD_UO = "userobject";
     public static final String FIELD_SERVER = "server";
+    public static final String FIELD_DOMAIN = "domain";
 }
