@@ -53,6 +53,12 @@ public class RouterImpl implements Router {
         shutdown();
     }
 
+    @Async
+    public Future<Integer> flush(){
+        domains.entrySet().forEach(e -> e.getValue().flush());
+        return new AsyncResult<>(1);
+    }
+
     public Future<Integer> reload(){
         return reload(true);
     }

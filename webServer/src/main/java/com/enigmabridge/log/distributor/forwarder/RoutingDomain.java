@@ -109,6 +109,10 @@ public class RoutingDomain {
         }
     }
 
+    public void flush(){
+        forwarders.entrySet().forEach(e -> e.getValue().flush());
+    }
+
     public void shutdown(){
         forwarders.entrySet().forEach(e -> e.getValue().shutdown());
     }

@@ -73,6 +73,18 @@ public class ManagementController {
     }
 
     /**
+     * Flushes all localy cached buffers to listeners.
+     *
+     * @return client response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/flush", method = RequestMethod.GET)
+    public GeneralResponse flush() {
+        router.flush();
+        return new ResultResponse();
+    }
+
+    /**
      * Dumps the whole client configuration.
      * @return client response
      */

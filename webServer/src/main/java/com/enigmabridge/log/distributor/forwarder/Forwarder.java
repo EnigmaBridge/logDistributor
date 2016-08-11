@@ -222,6 +222,16 @@ public class Forwarder {
                 && clientForwarder != null;
     }
 
+    public void flush(){
+        if (clientForwarder != null) {
+            try {
+                clientForwarder.flush();
+            } catch(Exception e){
+                LOG.error("Exception when flushing forwarder", e);
+            }
+        }
+    }
+
     public void shutdown(){
         this.running = false;
         if (clientForwarder != null) {
