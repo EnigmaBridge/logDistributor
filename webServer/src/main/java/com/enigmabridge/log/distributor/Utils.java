@@ -91,7 +91,7 @@ public class Utils {
         try {
             return Optional.ofNullable(json.getJSONObject(key));
         } catch(JSONException e){
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -111,7 +111,7 @@ public class Utils {
         try {
             return Optional.ofNullable(json.getString(key));
         } catch(JSONException e){
-            return null;
+            return Optional.empty();
         }
     }
 
