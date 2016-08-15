@@ -402,6 +402,7 @@ public class ManagementController {
                 final Client cl = Utils.getMap(domainApiClient, domain, apiKey);
                 if (cl == null) {
                     resp.addLine(String.format("Unrecognized domain:apiKey %s:%s", domain, apiKey));
+                    continue;
                 }
 
                 final JSONArray useArr = apiObj.getJSONArray(FIELD_USE);
