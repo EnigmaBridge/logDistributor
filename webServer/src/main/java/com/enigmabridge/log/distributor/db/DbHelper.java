@@ -42,7 +42,7 @@ public class DbHelper {
     @Autowired
     private EntityManager entityManager;
 
-    private int batchSize = 1000;
+    private int batchSize = 100;
 
     @Transactional
     public Domain getDomain(String domain){
@@ -118,23 +118,35 @@ public class DbHelper {
      * @param entities collection of entities to store
      * @return list of persisted entities
      */
+    @Transactional
     public <T extends DBID> Collection<T> bulkSave(Collection<T> entities) {
         return bulkSave(entities, batchSize);
     }
 
+    @Transactional
     public <T extends DBID> Collection<T> bulkSave(Collection<T> entities, int batchSize) {
         final List<T> savedEntities = new ArrayList<T>(entities.size());
         int i = 0;
         for (T t : entities) {
-            savedEntities.add(persistOrMerge(t));
+            T newEntity = t;
+            if (t.getId() == null) {
+                entityManager.persist(t);
+
+            } else {
+                entityManager.merge(t);
+            }
+
+            savedEntities.add(newEntity);
             i++;
             if (i % batchSize == 0) {
                 // Flush a batch of inserts and release memory.
                 entityManager.flush();
+                entityManager.clear();
             }
         }
 
         entityManager.flush();
+        entityManager.clear();
         return savedEntities;
     }
 
