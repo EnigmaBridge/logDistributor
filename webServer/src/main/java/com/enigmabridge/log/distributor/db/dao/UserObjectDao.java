@@ -1,6 +1,5 @@
 package com.enigmabridge.log.distributor.db.dao;
 
-import com.enigmabridge.log.distributor.db.model.SplunkConfig;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.springframework.data.repository.CrudRepository;
 

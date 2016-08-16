@@ -1,7 +1,6 @@
 package com.enigmabridge.log.distributor.forwarder;
 
 import com.enigmabridge.log.distributor.db.model.Client;
-import com.enigmabridge.log.distributor.db.model.UserObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

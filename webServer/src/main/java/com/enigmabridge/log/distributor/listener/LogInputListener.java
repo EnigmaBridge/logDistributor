@@ -2,11 +2,8 @@ package com.enigmabridge.log.distributor.listener;
 
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
-import com.enigmabridge.log.distributor.forwarder.Router;
-import com.enigmabridge.log.distributor.forwarder.RouterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;

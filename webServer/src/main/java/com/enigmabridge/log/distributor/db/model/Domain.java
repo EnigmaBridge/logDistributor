@@ -1,7 +1,5 @@
 package com.enigmabridge.log.distributor.db.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 

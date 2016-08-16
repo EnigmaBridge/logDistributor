@@ -1,6 +1,5 @@
 package com.enigmabridge.log.distributor.db.dao;
 
-import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.Domain;
 import org.springframework.data.repository.CrudRepository;
 
