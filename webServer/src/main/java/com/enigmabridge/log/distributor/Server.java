@@ -59,7 +59,9 @@ public class Server {
     protected void resyncHostsInternal() throws IOException {
         final Iterable<EBHost> allHosts = dbHelper.findAllHosts();
         for (EBHost host : allHosts) {
-            resyncHost(host);
+            if (Boolean.TRUE.equals(host.getSupportsSync())) {
+                resyncHost(host);
+            }
         }
     }
 
