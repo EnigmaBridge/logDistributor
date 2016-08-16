@@ -5,6 +5,7 @@ import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.model.Client;
+import com.enigmabridge.log.distributor.utils.DomainUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class RouterImpl implements Router {
         // Group by clients by domain
         final Map<String, List<Client>> clientsByDomain = clientList
                 .stream()
-                .collect(Collectors.groupingBy(RouterImpl::getDomain));
+                .collect(Collectors.groupingBy(DomainUtils::getDomain));
 
         // Compute domains to remove from the mapping - removed from configuration.
         final Set<String> removedDomains = new HashSet<>(domains.keySet());
@@ -148,7 +149,7 @@ public class RouterImpl implements Router {
     public void processMessage(JSONObject jsonObject){
         try {
             final int uoid = getUserObject(jsonObject);
-            final String domain = getDomain(jsonObject);
+            final String domain = DomainUtils.getDomain(jsonObject);
 
             LOG.info("domain: {}, uoid: {}, line: {}", domain, uoid, jsonObject);
             final RoutingDomain routingDomain = domains.get(domain);
@@ -177,30 +178,4 @@ public class RouterImpl implements Router {
         return Utils.getAsInteger(msg.getJSONObject(LogConstants.FIELD_DETAILS), LogConstants.FIELD_UO, 10);
     }
 
-    public static String getDomain(Client client){
-        final String clDomain = client.getDomain().getDomain();
-        return clDomain == null || clDomain.isEmpty() ? LogConstants.DEFAULT_DOMAIN : clDomain.toLowerCase();
-    }
-
-    public static String getDomain(JSONObject msg){
-        // {"details":{"domain":"ddd"}}
-        final Optional<String> detailsDomain = Utils.getAsJSON(msg, LogConstants.FIELD_DETAILS)
-                .map(e -> Utils.getAsString(e, LogConstants.FIELD_DOMAIN))
-                .orElse(Optional.empty());
-
-        if (detailsDomain.isPresent()){
-            return detailsDomain.get().toLowerCase();
-        }
-
-        return getDomain(msg.getString(LogConstants.FIELD_SERVER));
-    }
-
-    public static String getDomain(String server){
-        final int separatorIdx = server.indexOf("_");
-        if (separatorIdx == -1){
-            return LogConstants.DEFAULT_DOMAIN;
-        }
-
-        return server.substring(0, separatorIdx).toLowerCase();
-    }
 }

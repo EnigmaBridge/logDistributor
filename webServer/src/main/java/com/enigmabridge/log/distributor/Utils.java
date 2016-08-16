@@ -4,6 +4,7 @@ import org.hjson.JsonValue;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.Closeable;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,14 @@ public class Utils {
     public static String convertStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
+    }
+
+    public static String byte2hexNullable(byte[] bytes){
+        if (bytes == null){
+            return "";
+        }
+
+        return DatatypeConverter.printHexBinary(bytes);
     }
 
     public static <K1, K2, T> T getMap(Map<K1, Map<K2, T>> map, K1 k1, K2 k2){

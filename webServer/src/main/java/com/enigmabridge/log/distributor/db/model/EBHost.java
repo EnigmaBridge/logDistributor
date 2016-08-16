@@ -25,6 +25,9 @@ public class EBHost {
     @JoinColumn(name="domain_id", nullable=false)
     private Domain domain;
 
+    @Column
+    private Boolean supportsSync;
+
     public Integer getId() {
         return id;
     }
@@ -55,5 +58,13 @@ public class EBHost {
 
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    public Boolean getSupportsSync() {
+        return supportsSync;
+    }
+
+    public void setSupportsSync(Boolean supportsSync) {
+        this.supportsSync = supportsSync;
     }
 }

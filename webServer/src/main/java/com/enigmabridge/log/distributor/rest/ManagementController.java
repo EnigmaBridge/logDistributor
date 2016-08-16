@@ -13,6 +13,7 @@ import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
 import com.enigmabridge.log.distributor.db.model.*;
 import com.enigmabridge.log.distributor.forwarder.Router;
+import com.enigmabridge.log.distributor.utils.DomainUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -57,6 +58,9 @@ public class ManagementController {
     private DbHelper dbHelper;
 
     @Autowired
+    private LogicManager logic;
+
+    @Autowired
     private EntityManager em;
 
     /**
@@ -90,6 +94,7 @@ public class ManagementController {
      * Dumps the whole client configuration.
      * @return client response
      */
+    @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/list", method = RequestMethod.GET)
     public GeneralResponse dumpConfiguration(){
         final ConfigResponse resp = new ConfigResponse();
@@ -145,6 +150,7 @@ public class ManagementController {
             @PathVariable(value = "domain") String domain
     ){
         try {
+            domain = DomainUtils.sanitize(domain);
             dbHelper.deleteClientsByClientIdAndDomain(clientId, domain);
             router.reload(clientDao.findAll());
 
@@ -199,6 +205,7 @@ public class ManagementController {
                                      @RequestBody UserObject object
     ){
         try {
+            domain = DomainUtils.sanitize(domain);
             final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
@@ -305,7 +312,8 @@ public class ManagementController {
                     final String key = keyIt.next();
                     final JSONObject apiObj = apis.getJSONObject(key);
 
-                    final String domain = Utils.getAsString(apiObj, FIELD_DOMAIN).orElse(LogConstants.DEFAULT_DOMAIN);
+                    final String domain = DomainUtils.sanitize(Utils.getAsString(apiObj, FIELD_DOMAIN)
+                            .orElse(LogConstants.DEFAULT_DOMAIN));
                     final String apiKey = apiObj.getString(FIELD_API_KEY);
 
                     final Client clientModel = new Client();
@@ -362,73 +370,7 @@ public class ManagementController {
     @Transactional
     @RequestMapping(value = ApiConfig.API_PATH + "/client/site/configure", method = RequestMethod.POST)
     public GeneralResponse processSiteDump(@RequestBody String jsonStr){
-        final String FIELD_RESULT = "result";
-        final String FIELD_DOMAIN = "domain";
-        final String FIELD_USE = "use";
-
-        final LogResponse resp = new LogResponse();
-
-        // Load mapping:
-        // (domain, apiKey) -> client
-        //
-        // In current DB model we load all user object grouped by clients.
-        // This minimizes data to be read.
-        final TypedQuery<UserObject> query = em.createQuery("SELECT uo" +
-                " FROM UserObject uo" +
-                " GROUP BY uo.client", UserObject.class);
-
-        // Domain -> ApiKey -> Client
-        final Map<String, Map<String, Client>> domainApiClient = new HashMap<>();
-        for (UserObject uo : query.getResultList()){
-            final String domain = uo.getClient().getDomain().getDomain();
-            final String apiKey = uo.getApiKey();
-
-            domainApiClient.putIfAbsent(domain, new HashMap<>());
-            domainApiClient.get(domain).put(apiKey, uo.getClient());
-        }
-
-        // If (domain,apikey) -> client exists, update UOs for client.
-        try {
-            final JSONObject json = new JSONObject(jsonStr);
-            final JSONObject apis = json.getJSONObject(FIELD_RESULT);
-
-            final Iterator<String> keyIt = apis.keys();
-            for(;keyIt.hasNext();) {
-                final String apiKey = keyIt.next();
-                final JSONObject apiObj = apis.getJSONObject(apiKey);
-                final String domain = apiObj.getString(FIELD_DOMAIN);
-
-                // If domain,apiKey is not in mapping, cannot continue -> we dont know to which client we should map.
-                final Client cl = Utils.getMap(domainApiClient, domain, apiKey);
-                if (cl == null) {
-                    resp.addLine(String.format("Unrecognized domain:apiKey %s:%s", domain, apiKey));
-                    continue;
-                }
-
-                final JSONArray useArr = apiObj.getJSONArray(FIELD_USE);
-                final List<UserObject> uos = new ArrayList<>(useArr.length());
-                for (int idx2 = 0, ln2 = useArr.length(); idx2 < ln2; idx2++) {
-                    final UserObject uo = new UserObject();
-                    uo.setApiKey(apiKey);
-                    uo.setClient(cl);
-                    uo.setUoId(useArr.getInt(idx2));
-                    uos.add(uo);
-                }
-
-                // Keep configuration of the existing client record. Delete all user objects - will be replaced by
-                // new user object list. Only domain is updated.
-                userObjectDao.delete(cl.getObjects());
-                cl.setObjects(uos);
-                clientDao.save(cl);
-            }
-
-        } catch(Exception e){
-            LOG.error("Exception in parsing input data", e);
-            return new ErrorResponse("Exception in parsing input data");
-        }
-
-        router.reload(clientDao.findAll());
-        return resp;
+        return logic.processSiteDump(jsonStr);
     }
 
     /**
@@ -445,6 +387,7 @@ public class ManagementController {
                                         @RequestBody UserObject object
     ){
         try {
+            domain = DomainUtils.sanitize(domain);
             final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
@@ -493,6 +436,7 @@ public class ManagementController {
                                              @RequestBody ClientReq newClient
     ){
         try {
+            domain = DomainUtils.sanitize(domain);
             final Client client = dbHelper.findByClientIdAndDomain(clientId, domain);
             if (client == null){
                 return new ErrorResponse("Client not found");
