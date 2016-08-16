@@ -33,6 +33,7 @@ dependencies {
     compile 'org.hjson:hjson:1.1.4'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.5.3'
 
+    compile 'mysql:mysql-connector-java:5.1.31'
     compile 'org.xerial:sqlite-jdbc:3.8.11.2'
     compile 'com.enigmabridge:hibernate4-sqlite-dialect:0.1.2'
     compile 'com.enigmabridge:retry:0.1.0'
