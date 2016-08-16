@@ -126,6 +126,10 @@ public class LogicManager {
                 // new user object list. Only domain is updated.
                 userObjectDao.delete(cl.getObjects());
                 cl.setObjects(uos);
+
+                // Bulk size large collection of UOs. Better for performance.
+                dbHelper.bulkSave(uos);
+                // Then save root object.
                 clientDao.save(cl);
             }
 

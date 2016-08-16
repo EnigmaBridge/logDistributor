@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Table(indexes = {
     @Index(columnList = "apiKey")
 })
-public class UserObject {
+public class UserObject implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

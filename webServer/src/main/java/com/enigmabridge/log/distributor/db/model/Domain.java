@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table
-public class Domain {
+public class Domain implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

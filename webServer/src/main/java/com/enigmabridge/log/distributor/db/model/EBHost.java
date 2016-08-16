@@ -9,7 +9,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table
-public class EBHost {
+public class EBHost implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

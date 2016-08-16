@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table()
-public class SplunkConfig {
+public class SplunkConfig implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

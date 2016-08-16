@@ -15,7 +15,7 @@ import java.util.List;
 @Table(indexes = {
         @Index(columnList = "clientId")
 })
-public class Client {
+public class Client implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

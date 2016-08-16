@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Table(indexes = {
         @Index(columnList = "apiKey")
 })
-public class ApiKey2Client {
+public class ApiKey2Client implements DBID{
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)

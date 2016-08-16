@@ -5,13 +5,18 @@ import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.DomainDao;
 import com.enigmabridge.log.distributor.db.dao.EBHostDao;
 import com.enigmabridge.log.distributor.db.model.Client;
+import com.enigmabridge.log.distributor.db.model.DBID;
 import com.enigmabridge.log.distributor.db.model.Domain;
 import com.enigmabridge.log.distributor.db.model.EBHost;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +38,11 @@ public class DbHelper {
 
     @Autowired
     private EBHostDao hostDao;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    private int batchSize = 1000;
 
     @Transactional
     public Domain getDomain(String domain){
@@ -101,6 +111,42 @@ public class DbHelper {
         return clientDao.findAll();
     }
 
+    /**
+     * Stores collection of entities in a bulk
+     * http://frightanic.com/software-development/jpa-batch-inserts/
+     *
+     * @param entities collection of entities to store
+     * @return list of persisted entities
+     */
+    public <T extends DBID> Collection<T> bulkSave(Collection<T> entities) {
+        return bulkSave(entities, batchSize);
+    }
 
+    public <T extends DBID> Collection<T> bulkSave(Collection<T> entities, int batchSize) {
+        final List<T> savedEntities = new ArrayList<T>(entities.size());
+        int i = 0;
+        for (T t : entities) {
+            savedEntities.add(persistOrMerge(t));
+            i++;
+            if (i % batchSize == 0) {
+                // Flush a batch of inserts and release memory.
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+        return savedEntities;
+    }
+
+    private <T extends DBID> T persistOrMerge(T t) {
+        if (t.getId() == null) {
+            entityManager.persist(t);
+            return t;
+        } else {
+            return entityManager.merge(t);
+        }
+    }
 
 }

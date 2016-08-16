@@ -337,8 +337,10 @@ public class ManagementController {
                         userObjectDao.delete(clientFromDb.getObjects());
                         clientFromDb.setObjects(clientModel.getObjects());
                         clientFromDb.setDomain(clientModel.getDomain());
+                        //TODO: optimize inserts of UOs
                         clientDao.save(clientFromDb);
                     } else {
+                        //TODO: optimize inserts of UOs
                         clientDao.save(clientModel);
                     }
 

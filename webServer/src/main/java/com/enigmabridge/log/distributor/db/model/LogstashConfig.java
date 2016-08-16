@@ -7,10 +7,18 @@ import javax.persistence.*;
  */
 @Entity
 @Table()
-public class LogstashConfig {
+public class LogstashConfig implements DBID {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }
