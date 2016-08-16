@@ -27,7 +27,7 @@
     <logger name="org.hibernate.jdbc" level="info" additivity="false">
         <appender-ref ref="consoleAppender" />
     </logger>
-    <logger name="org.hibernate.type" level="ALL" additivity="false">
+    <logger name="org.hibernate.type" level="info" additivity="false">
         <appender-ref ref="consoleAppender" />
     </logger>
 
