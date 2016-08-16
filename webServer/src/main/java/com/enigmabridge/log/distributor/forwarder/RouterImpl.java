@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor.forwarder;
 
+import com.enigmabridge.log.distributor.Application;
 import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
@@ -43,9 +44,7 @@ public class RouterImpl implements Router {
     protected ClientDao clientDao;
 
     @PostConstruct
-    @Async
     public void init(){
-        // Will not be async - @Async required wrapping proxy to be used.
         reload(false);
     }
 
@@ -54,7 +53,7 @@ public class RouterImpl implements Router {
         shutdown();
     }
 
-    @Async
+    @Async(value = Application.ROUTER_RELOAD_EXECUTOR)
     public Future<Integer> flush(){
         domains.entrySet().forEach(e -> e.getValue().flush());
         return new AsyncResult<>(1);
@@ -76,7 +75,7 @@ public class RouterImpl implements Router {
      * @param clients client database to use
      * @return future to track progress.
      */
-    @Async
+    @Async(value = Application.ROUTER_RELOAD_EXECUTOR)
     public Future<Integer> reload(Iterable<Client> clients){
         return this.reload(clients, true);
     }
@@ -89,7 +88,7 @@ public class RouterImpl implements Router {
      * @param lazy if false, connectors are reinitialized even if configuration didnt change
      * @return future to track progress.
      */
-    @Async
+    @Async(value = Application.ROUTER_RELOAD_EXECUTOR)
     public Future<Integer> reload(Iterable<Client> clients, boolean lazy){
         LOG.info("Reloading router[lazy={}]...", lazy);
 

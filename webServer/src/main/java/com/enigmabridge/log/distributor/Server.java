@@ -4,13 +4,10 @@ import com.enigmabridge.log.distributor.db.DbHelper;
 import com.enigmabridge.log.distributor.db.model.EBHost;
 import com.enigmabridge.log.distributor.forwarder.Router;
 import com.enigmabridge.log.distributor.rest.LogicManager;
-import com.enigmabridge.log.distributor.rest.ManagementController;
-import com.enigmabridge.log.distributor.utils.EBAdditionalTrust;
 import com.enigmabridge.log.distributor.utils.EBConnector;
 import com.enigmabridge.log.distributor.utils.EBRawRequest;
 import com.enigmabridge.log.distributor.utils.EBRawResponse;
 import com.enigmabridge.retry.EBUtils;
-import okhttp3.OkHttpClient;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +16,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.Future;
 
 /**
  * Created by dusanklinec on 11.08.16.
@@ -49,7 +42,7 @@ public class Server {
     /**
      * Resynchronizes configured hosts records.
      */
-    @Async()
+    @Async(value = Application.SERVER_RESYNC_EXECUTOR)
     @Scheduled(initialDelay = 20000, fixedRate = 1000*60*10)
     @Transactional
     public void resyncHostsTask() throws IOException {
