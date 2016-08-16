@@ -133,6 +133,8 @@ public class LogicManager {
                 clientDao.save(cl);
             }
 
+            em.flush();
+            em.clear();
         } catch(Exception e){
             LOG.error("Exception in parsing input data", e);
             return new ErrorResponse("Exception in parsing input data");
