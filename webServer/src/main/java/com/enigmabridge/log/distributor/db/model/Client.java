@@ -2,6 +2,7 @@ package com.enigmabridge.log.distributor.db.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,6 +76,13 @@ public class Client implements DBID {
     public void addObject(UserObject uo){
         getObjects().add(uo);
         uo.setClient(this);
+    }
+
+    public void addObjects(Collection<UserObject> uos){
+        for(UserObject uo : uos) {
+            getObjects().add(uo);
+            uo.setClient(this);
+        }
     }
 
     public void setObjects(List<UserObject> objects) {

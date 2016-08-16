@@ -112,29 +112,46 @@ public class LogicManager {
                     continue;
                 }
 
+                // Build set of currently existing UOs
+                final Set<UserObject> uoExisting = new HashSet<>(cl.getObjects());
+
+                // UOlist to add & remove.
+                final List<UserObject> uos2add = new LinkedList<>();
+                final Set<UserObject> uos2del = new HashSet<>(uoExisting);
+
+                // Add only user objects not yet created.
                 final JSONArray useArr = apiObj.getJSONArray(FIELD_USE);
-                final List<UserObject> uos = new ArrayList<>(useArr.length());
                 for (int idx2 = 0, ln2 = useArr.length(); idx2 < ln2; idx2++) {
                     final UserObject uo = new UserObject();
                     uo.setApiKey(apiKey);
                     uo.setClient(cl);
                     uo.setUoId(useArr.getInt(idx2));
-                    uos.add(uo);
+                    uos2del.remove(uo);
+
+                    if (!uoExisting.contains(uo)){
+                        uos2add.add(uo);
+                    }
                 }
 
                 // Keep configuration of the existing client record. Delete all user objects - will be replaced by
                 // new user object list. Only domain is updated.
-                userObjectDao.delete(cl.getObjects());
-                cl.setObjects(uos);
+                if (!uos2del.isEmpty()){
+                    userObjectDao.delete(uos2del);
+                    cl.getObjects().removeAll(uos2del);
+                }
+
+                if (!uos2add.isEmpty()){
+                    cl.addObjects(uos2add);
+                }
 
                 // Bulk size large collection of UOs. Better for performance.
-                dbHelper.bulkSave(uos);
+                //dbHelper.bulkSave(uos);
+
                 // Then save root object.
                 clientDao.save(cl);
             }
 
             em.flush();
-            em.clear();
         } catch(Exception e){
             LOG.error("Exception in parsing input data", e);
             return new ErrorResponse("Exception in parsing input data");
