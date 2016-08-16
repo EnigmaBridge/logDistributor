@@ -131,12 +131,10 @@ public class DbHelper {
             if (i % batchSize == 0) {
                 // Flush a batch of inserts and release memory.
                 entityManager.flush();
-                entityManager.clear();
             }
         }
 
         entityManager.flush();
-        entityManager.clear();
         return savedEntities;
     }
 
