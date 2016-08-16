@@ -1,12 +1,12 @@
 # send logs from log server to distributor running locally
-ssh -R 8998:localhost:8998 eblog-server
+ssh -R 8998:localhost:8998 -L 3306:localhost:3306 eblog-server
 ssh -L 8001:localhost:8000 -L 8088:localhost:8088 eblog-client
 
 # Init
 insert into domain(domain) VALUES("development");
 insert into domain(domain) VALUES("production");
-insert into ebhost(host_address, host_name, domain_id) VALUES('site2.enigmabridge.com', 'dragonfly', 1);
-insert into ebhost(host_address, host_name, domain_id) VALUES('site1.enigmabridge.com', 'damselfly', 2);
+insert into ebhost(host_address, host_name, domain_id, supports_sync) VALUES('site2.enigmabridge.com', 'dragonfly', 1, 1);
+insert into ebhost(host_address, host_name, domain_id, supports_sync) VALUES('site1.enigmabridge.com', 'damselfly', 2, 0);
 
 # Set the clients - old ones with given client ID will be removed
 curl  --insecure -H "Content-Type:application/json" -H 'X-Auth-Token: a' 'https://localhost:8443/api/v1/client/add' -d '{"clients":[{"clientId":"API_TEST", "splunkConfig": {"endpoint":"tcp://127.0.0.1:4000", "token": "abc", "caRoots": "---pem---", "verifyTls":true}, "objects":[{"apiKey":"API_TEST","uoType":12,"uoId":123},{"apiKey":"API_TEST","uoType":12,"uoId":321}]}]}'
