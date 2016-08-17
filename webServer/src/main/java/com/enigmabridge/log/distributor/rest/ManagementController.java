@@ -29,9 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Create new API Key calls, common administration stuff.
@@ -317,13 +315,25 @@ public class ManagementController {
                     final String key = keyIt.next();
                     final JSONObject apiObj = apis.getJSONObject(key);
 
-                    final String domain = DomainUtils.sanitize(Utils.getAsString(apiObj, FIELD_DOMAIN)
-                            .orElse(LogConstants.DEFAULT_DOMAIN));
+                    final String domain = DomainUtils.sanitize(Utils.getAsString(apiObj, FIELD_DOMAIN).orElse(LogConstants.DEFAULT_DOMAIN));
                     final String apiKey = apiObj.getString(FIELD_API_KEY);
 
                     final Client clientModel = new Client();
                     clientModel.setDomain(dbHelper.getDomain(domain));
                     clientModel.setClientId(cl.getString(FIELD_CLIENT_ID));
+
+                    // Exists in database? If yes, keep stats config.
+                    final Client clientFromDb = dbHelper.findByClientIdAndDomain(clientModel.getClientId(), clientModel.getDomain());
+
+                    // Build set of currently existing UOs - for set operations.
+                    final Set<UserObject> uoExisting = new HashSet<>();
+                    if (clientFromDb != null){
+                        uoExisting.addAll(clientFromDb.getObjects());
+                    }
+
+                    // UOlist to add & remove.
+                    final List<UserObject> uos2add = new LinkedList<>();
+                    final Set<UserObject> uos2del = new HashSet<>(uoExisting);
 
                     final JSONArray useArr = apiObj.getJSONArray(FIELD_USE);
                     for(int idx2=0, ln2=useArr.length(); idx2<ln2; idx2++){
@@ -331,21 +341,30 @@ public class ManagementController {
                         uo.setApiKey(apiKey);
                         uo.setClient(clientModel);
                         uo.setUoId(useArr.getInt(idx2));
-                        clientModel.addObject(uo);
+
+                        uos2del.remove(uo);
+                        if (!uoExisting.contains(uo)){
+                            uos2add.add(uo);
+                        }
                     }
 
-                    // Exists in database? If yes, keep stats config.
-                    final Client clientFromDb = dbHelper.findByClientIdAndDomain(clientModel.getClientId(), clientModel.getDomain());
                     if (clientFromDb != null){
                         // Keep configuration of the existing client record. Delete all user objects - will be replaced by
                         // new user object list. Only domain is updated.
-                        userObjectDao.delete(clientFromDb.getObjects());
-                        clientFromDb.setObjects(clientModel.getObjects());
+                        if (!uos2del.isEmpty()){
+                            userObjectDao.delete(uos2del);
+                            clientFromDb.getObjects().removeAll(uos2del);
+                        }
+
+                        if (!uos2add.isEmpty()){
+                            clientFromDb.addObjects(uos2add);
+                        }
+
                         clientFromDb.setDomain(clientModel.getDomain());
-                        //TODO: optimize inserts of UOs
                         clientDao.save(clientFromDb);
+                        
                     } else {
-                        //TODO: optimize inserts of UOs
+                        clientModel.addObjects(uos2add);
                         clientDao.save(clientModel);
                     }
 
