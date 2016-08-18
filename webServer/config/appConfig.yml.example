@@ -1,9 +1,22 @@
 # Database
 spring:
   datasource:
-    url: jdbc:sqlite:logger_config.sqlite
-    username:
-    password:
+    #url: jdbc:sqlite:logger_config.sqlite
+    #username:
+    #password:
+    url: jdbc:mysql://localhost:3306/logdist?autoReconnect=true&amp;rewriteBatchedStatements=true
+    username: logdist
+    password: logdist
+
+#spring:
+#  jpa:
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  path: /tmp
+  logfile: /tmp/logdist.log
 
 # TCP JSON line listener (logstash input)
 listener:
