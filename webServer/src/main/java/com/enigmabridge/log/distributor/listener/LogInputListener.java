@@ -79,7 +79,7 @@ public class LogInputListener extends Thread {
 
             LOG.info("Server shutting down");
         } catch (Exception e) {
-            LOG.error("Listen exception", e);
+            LOG.error(String.format("Listen exception on %s:%d", listenIp, listenPort), e);
         } finally {
             Utils.closeSilently(listenSocket);
         }
