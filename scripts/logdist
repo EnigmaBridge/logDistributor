@@ -73,7 +73,7 @@ stop)
             exit 1
         else
             PID=`cat $PID_FILE`
-            kill -HUP $PID
+            kill $PID # -HUP was used before
             echoGreen "Stopped [$PID]"
             rm -f $PID_FILE
             exit 0
