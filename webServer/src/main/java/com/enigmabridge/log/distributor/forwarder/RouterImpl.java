@@ -150,7 +150,7 @@ public class RouterImpl implements Router {
             final int uoid = getUserObject(jsonObject);
             final String domain = DomainUtils.getDomain(jsonObject);
 
-            LOG.info("domain: {}, uoid: {}, line: {}", domain, uoid, jsonObject);
+            LOG.trace("domain: {}, uoid: {}, line: {}", domain, uoid, jsonObject);
             final RoutingDomain routingDomain = domains.get(domain);
             if (routingDomain == null){
                 return;
