@@ -96,7 +96,7 @@ class PropertiesConfiguration {
         propList.add(yaml.getObject());
 
         propConfig.setPropertiesArray(propList.toArray(new Properties[propList.size()]));
-        propConfig.setOrder(Ordered.HIGHEST_PRECEDENCE); // high value = low priority
+        propConfig.setOrder(-100); // high value = low priority
         return propConfig;
     }
 
