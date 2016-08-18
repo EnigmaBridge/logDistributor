@@ -23,6 +23,10 @@ listener:
   host: localhost
   port: 8998
 
+# HTTPS REST server port
+server:
+  port: 8444
+
 # Authentication tokens for API access.
 auth:
     management:
