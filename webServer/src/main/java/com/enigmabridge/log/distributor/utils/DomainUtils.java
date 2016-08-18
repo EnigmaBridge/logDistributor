@@ -1,7 +1,6 @@
 package com.enigmabridge.log.distributor.utils;
 
 import com.enigmabridge.log.distributor.LogConstants;
-import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.db.model.Client;
 import org.json.JSONObject;
 

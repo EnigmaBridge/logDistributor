@@ -1,6 +1,5 @@
 package com.enigmabridge.log.distributor.utils;
 
-import com.enigmabridge.log.distributor.Utils;
 import okhttp3.OkHttpClient;
 import org.json.JSONObject;
 

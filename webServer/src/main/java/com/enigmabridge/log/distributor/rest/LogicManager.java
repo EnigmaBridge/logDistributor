@@ -1,8 +1,7 @@
 package com.enigmabridge.log.distributor.rest;
 
-import com.enigmabridge.log.distributor.Server;
 import com.enigmabridge.log.distributor.Stats;
-import com.enigmabridge.log.distributor.Utils;
+import com.enigmabridge.log.distributor.utils.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.api.response.ErrorResponse;
 import com.enigmabridge.log.distributor.api.response.GeneralResponse;

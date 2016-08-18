@@ -1,7 +1,7 @@
 package com.enigmabridge.log.distributor.listener;
 
 import com.enigmabridge.log.distributor.Stats;
-import com.enigmabridge.log.distributor.Utils;
+import com.enigmabridge.log.distributor.utils.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

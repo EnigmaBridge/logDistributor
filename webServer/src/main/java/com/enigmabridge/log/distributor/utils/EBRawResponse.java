@@ -1,7 +1,5 @@
 package com.enigmabridge.log.distributor.utils;
 
-import com.enigmabridge.log.distributor.Utils;
-
 import java.io.Serializable;
 
 /**

@@ -2,7 +2,7 @@ package com.enigmabridge.log.distributor.listener;
 
 import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Stats;
-import com.enigmabridge.log.distributor.Utils;
+import com.enigmabridge.log.distributor.utils.Utils;
 import com.enigmabridge.log.distributor.forwarder.Router;
 import org.json.JSONObject;
 import org.slf4j.Logger;
