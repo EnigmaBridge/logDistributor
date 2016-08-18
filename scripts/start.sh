@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-APP_CONFIG="/etc/logdist/appConfig.yml"
-LOG_CONFIG="/etc/logdist/logback.xml"
-KEYSTORE_PATH="/etc/logdist/onetimekeystore.jks"
-LOG_FILE="/var/log/logdist/logdist.log"
+PRODUCT="logdist"
+APP_CONFIG="/etc/${PRODUCT}/appConfig.yml"
+LOG_CONFIG="/etc/${PRODUCT}/logback.xml"
+KEYSTORE_PATH="/etc/${PRODUCT}/onetimekeystore.jks"
+LOG_FILE="/var/log/${PRODUCT}/${PRODUCT}.log"
 JAR_PATH="/opt/logdist/webServer/build/libs/webServer-1.0-SNAPSHOT.jar"
 
 # ***********************************************
