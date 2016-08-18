@@ -20,6 +20,9 @@ curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8444/api/v1/client/list
 # reload current settings - lazy, connectors reload only if config changes
 curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8444/api/v1/reload'
 
+# show current statistics
+curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8444/api/v1/stats'
+
 # reload current settings - eager. Reconnect.
 curl  --insecure -H 'X-Auth-Token: a' 'https://localhost:8444/api/v1/reload?lazy=false'
 
