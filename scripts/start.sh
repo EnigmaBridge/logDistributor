@@ -8,8 +8,7 @@ JAR_PATH="/opt/logdist/webServer/build/libs/webServer-1.0-SNAPSHOT.jar"
 # ***********************************************
 # ***********************************************
 
-ARGS=" -Dconfig.location=${APP_CONFIG} -Dlogging.logfile=${LOG_FILE} "
-#-Dlogback.configurationFile=${LOG_CONFIG}"
+ARGS=" -Dconfig.location=${APP_CONFIG} -Dlogging.logfile=${LOG_FILE} -Dlogback.configurationFile=${LOG_CONFIG}"
 
 exec java $ARGS -jar "${JAR_PATH}" $*
 
