@@ -1,7 +1,6 @@
 package com.enigmabridge.log.distributor.rest;
 
 import com.enigmabridge.log.distributor.Stats;
-import com.enigmabridge.log.distributor.utils.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.api.response.ErrorResponse;
 import com.enigmabridge.log.distributor.api.response.GeneralResponse;
@@ -14,6 +13,7 @@ import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import com.enigmabridge.log.distributor.forwarder.Router;
 import com.enigmabridge.log.distributor.utils.DomainUtils;
+import com.enigmabridge.log.distributor.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
