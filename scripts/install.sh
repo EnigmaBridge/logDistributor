@@ -13,7 +13,7 @@ sudo git clone https://github.com/EnigmaBridge/logDistributor.git "/opt/${PRODUC
     cd "/etc/${PRODUCT}" && \
     sudo bash "/opt/${PRODUCT}/createKeystore.sh" && \
     cd "/opt/${PRODUCT}" && \
-    bash buildBoot.sh && \
+    sudo bash buildBoot.sh && \
     echo "OK"
 
 
