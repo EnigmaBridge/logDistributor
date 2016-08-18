@@ -33,6 +33,9 @@ public class Server {
     private DbHelper dbHelper;
 
     @Autowired
+    private Stats stats;
+
+    @Autowired
     private LogicManager logic;
 
     public void reload(boolean lazy){
@@ -68,6 +71,7 @@ public class Server {
             conn.setRawRequest(req);
             final EBRawResponse resp = conn.request();
             if (!resp.isSuccessful()){
+                stats.incHostResyncFailed();
                 LOG.warn("Request unsuccessful: {}", url);
                 return;
             }
@@ -75,12 +79,14 @@ public class Server {
             final String body = resp.getBody();
             final JSONObject obj  = new JSONObject(body);
             if (obj == null || !obj.has("status")){
+                stats.incHostResyncFailed();
                 LOG.warn("Request has invalid status url: {} body: {}", url, body);
                 return;
             }
 
             final Integer status = EBUtils.tryGetAsInteger(obj, "status", 16);
             if (status == null || status.intValue() != 0x9000){
+                stats.incHostResyncFailed();
                 LOG.warn("Request has invalid status url: {} status: {}", url, status);
                 return;
             }

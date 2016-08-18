@@ -159,6 +159,7 @@ public class LogicManager {
 
             em.flush();
         } catch(Exception e){
+            stats.incHostResyncFailed();
             LOG.error("Exception in parsing input data", e);
             return new ErrorResponse("Exception in parsing input data");
         }

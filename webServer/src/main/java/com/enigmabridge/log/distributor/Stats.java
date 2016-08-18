@@ -13,6 +13,7 @@ public class Stats {
     private final AtomicLong numReloads = new AtomicLong(0);
     private final AtomicLong numFlushes = new AtomicLong(0);
     private final AtomicLong numHostResync = new AtomicLong(0);
+    private final AtomicLong numHostResyncFailed = new AtomicLong(0);
     private final AtomicLong numUOAdded = new AtomicLong(0);
     private final AtomicLong numUORemoved = new AtomicLong(0);
     private final AtomicLong numTcpConnections = new AtomicLong(0);
@@ -31,17 +32,21 @@ public class Stats {
         numReloads.incrementAndGet();
     }
     public void incFlushes(){
-        numReloads.incrementAndGet();
+        numFlushes.incrementAndGet();
     }
     public void incHostResync(){
-        numReloads.incrementAndGet();
+        numHostResync.incrementAndGet();
+        lastHostResync = System.currentTimeMillis();
+    }
+    public void incHostResyncFailed(){
+        numHostResyncFailed.incrementAndGet();
         lastHostResync = System.currentTimeMillis();
     }
     public void incUOAdded(int added){
-        numReloads.addAndGet(added);
+        numUOAdded.addAndGet(added);
     }
     public void incUORemoved(int removed){
-        numReloads.addAndGet(removed);
+        numUORemoved.addAndGet(removed);
     }
     public void incTcpConnections(){
         numTcpConnections.incrementAndGet();
@@ -74,6 +79,10 @@ public class Stats {
 
     public AtomicLong getNumHostResync() {
         return numHostResync;
+    }
+
+    public AtomicLong getNumHostResyncFailed() {
+        return numHostResyncFailed;
     }
 
     public AtomicLong getNumUOAdded() {
