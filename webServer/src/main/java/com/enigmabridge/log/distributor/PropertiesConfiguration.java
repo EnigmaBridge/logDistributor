@@ -53,7 +53,7 @@ class PropertiesConfiguration {
 
         final Resource[] possiblePropertiesResources = {
                 new PathResource(getCustomConfigPath()),
-                new PathResource("/etc/eb-manager/" + CONFIG_FILE_NAME),
+                new PathResource("/etc/logdist/" + CONFIG_FILE_NAME),
                 new PathResource("config/" + CONFIG_FILE_NAME),
                 new PathResource(CONFIG_FILE_NAME),
                 new ClassPathResource(CONFIG_FILE_NAME)
