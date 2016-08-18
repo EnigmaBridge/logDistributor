@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
@@ -28,7 +27,7 @@ import static java.util.stream.Collectors.toMap;
 @Configuration
 class PropertiesConfiguration {
     private final static Logger LOG = LoggerFactory.getLogger(PropertiesConfiguration.class);
-    private final static String[] PROPERTIES_FILENAMES = {"application.properties"};
+    private final static String[] PROPERTIES_FILENAMES = {"default.properties"};
     private static final String CONFIG_FILE_NAME = "appConfig.yml";
 
     @Value("${properties.location:}")
@@ -37,18 +36,39 @@ class PropertiesConfiguration {
     @Value("${config.location:}")
     private String configLocation;
 
-    @Bean(name = "properties-config")
-    public Map<String, Properties> myProperties() {
-        return stream(PROPERTIES_FILENAMES)
-                .collect(toMap(filename -> filename, this::loadProperties));
+    @Deprecated
+    public PropertySourcesPlaceholderConfigurer configProperties() {
+        final PropertySourcesPlaceholderConfigurer propConfig = new PropertySourcesPlaceholderConfigurer();
+        for(String file : PROPERTIES_FILENAMES){
+            final Properties props = loadProperties(file);
+            if (props == null){
+                continue;
+            }
+
+            propConfig.setProperties(props);
+        }
+
+        propConfig.setOrder(100); // high value = low priority
+        return propConfig;
     }
 
     @Bean(name = ApiConfig.YAML_CONFIG)
-    @DependsOn(value = "properties-config")
-    public PropertySourcesPlaceholderConfigurer configFileLoad() {
-        final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-        final YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+    public PropertySourcesPlaceholderConfigurer configYaml() {
+        final PropertySourcesPlaceholderConfigurer propConfig = new PropertySourcesPlaceholderConfigurer();
+        final List<Properties> propList = new LinkedList<>();
 
+        // Load properties at first
+        for(String file : PROPERTIES_FILENAMES){
+            final Properties props = loadProperties(file);
+            if (props == null){
+                continue;
+            }
+
+            propList.add(props);
+        }
+
+        // Locate YAML
+        final YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
         final Resource[] possiblePropertiesResources = {
                 new PathResource(getCustomConfigPath()),
                 new PathResource("/etc/logdist/" + CONFIG_FILE_NAME),
@@ -62,7 +82,7 @@ class PropertiesConfiguration {
                 .reduce((previous, current) -> current);
 
         if (!resource.isPresent()){
-            return propertySourcesPlaceholderConfigurer;
+            return propConfig;
         }
 
         // Log which file was actually used.
@@ -73,8 +93,11 @@ class PropertiesConfiguration {
         }
 
         yaml.setResources(resource.get());
-        propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
-        return propertySourcesPlaceholderConfigurer;
+        propList.add(yaml.getObject());
+
+        propConfig.setPropertiesArray(propList.toArray(new Properties[propList.size()]));
+        propConfig.setOrder(Ordered.HIGHEST_PRECEDENCE); // high value = low priority
+        return propConfig;
     }
 
     private Properties loadProperties(final String filename) {
@@ -87,9 +110,12 @@ class PropertiesConfiguration {
         final Resource resource = stream(possiblePropertiesResources)
                 .filter(Resource::exists)
                 .reduce((previous, current) -> current)
-                .get();
-        final Properties properties = new Properties();
+                .orElse(null);
+        if (resource == null){
+            return null;
+        }
 
+        final Properties properties = new Properties();
         try {
             properties.load(resource.getInputStream());
         } catch(final IOException exception) {
