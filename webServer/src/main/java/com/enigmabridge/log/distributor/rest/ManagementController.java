@@ -2,6 +2,7 @@ package com.enigmabridge.log.distributor.rest;
 
 import com.enigmabridge.log.distributor.LogConstants;
 import com.enigmabridge.log.distributor.Server;
+import com.enigmabridge.log.distributor.Stats;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.api.requests.AddClientsRequest;
@@ -64,6 +65,9 @@ public class ManagementController {
     private LogicManager logic;
 
     @Autowired
+    private Stats stats;
+
+    @Autowired
     private EntityManager em;
 
     /**
@@ -78,6 +82,7 @@ public class ManagementController {
             @RequestParam(required = false, value="lazy", defaultValue = "true") boolean lazy
     ){
         router.reload(clientDao.findAll(), lazy);
+        stats.incReloads();
         return new ResultResponse();
     }
 
@@ -90,6 +95,7 @@ public class ManagementController {
     @RequestMapping(value = ApiConfig.API_PATH + "/flush", method = RequestMethod.GET)
     public GeneralResponse flush() {
         router.flush();
+        stats.incFlushes();
         return new ResultResponse();
     }
 
@@ -118,6 +124,17 @@ public class ManagementController {
         resp.setDomains(domainList);
         resp.setHosts(hostList);
         return resp;
+    }
+
+    /**
+     * Dumps local statistics.
+     *
+     * @return client response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/stats", method = RequestMethod.GET)
+    public Stats dumpStats(){
+        return stats;
     }
 
     /**

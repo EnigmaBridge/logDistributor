@@ -1,6 +1,7 @@
 package com.enigmabridge.log.distributor.rest;
 
 import com.enigmabridge.log.distributor.Server;
+import com.enigmabridge.log.distributor.Stats;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import com.enigmabridge.log.distributor.api.response.ErrorResponse;
@@ -50,6 +51,9 @@ public class LogicManager {
 
     @Autowired
     private DbHelper dbHelper;
+
+    @Autowired
+    private Stats stats;
 
     @Autowired
     private EntityManager em;
@@ -105,7 +109,9 @@ public class LogicManager {
                 // If domain,apiKey is not in mapping, cannot continue -> we dont know to which client we should map.
                 final Client cl = Utils.getMap(domainApiClient, domain, apiKey);
                 if (cl == null) {
-                    resp.addLine(String.format("Unrecognized domain:apiKey %s:%s", domain, apiKey));
+                    final String logLine = String.format("Unrecognized domain:apiKey %s:%s", domain, apiKey);
+                    resp.addLine(logLine);
+                    LOG.warn(logLine);
                     continue;
                 }
 
@@ -135,10 +141,12 @@ public class LogicManager {
                 if (!uos2del.isEmpty()){
                     userObjectDao.delete(uos2del);
                     cl.getObjects().removeAll(uos2del);
+                    stats.incUORemoved(uos2del.size());
                 }
 
                 if (!uos2add.isEmpty()){
                     cl.addObjects(uos2add);
+                    stats.incUOAdded(uos2add.size());
                 }
 
                 // Bulk size large collection of UOs. Better for performance.
@@ -146,6 +154,7 @@ public class LogicManager {
 
                 // Then save root object.
                 clientDao.save(cl);
+                stats.incHostResync();
             }
 
             em.flush();

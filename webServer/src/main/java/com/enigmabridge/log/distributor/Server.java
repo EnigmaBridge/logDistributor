@@ -68,17 +68,20 @@ public class Server {
             conn.setRawRequest(req);
             final EBRawResponse resp = conn.request();
             if (!resp.isSuccessful()){
+                LOG.warn("Request unsuccessful: {}", url);
                 return;
             }
 
             final String body = resp.getBody();
             final JSONObject obj  = new JSONObject(body);
             if (obj == null || !obj.has("status")){
+                LOG.warn("Request has invalid status url: {} body: {}", url, body);
                 return;
             }
 
             final Integer status = EBUtils.tryGetAsInteger(obj, "status", 16);
             if (status == null || status.intValue() != 0x9000){
+                LOG.warn("Request has invalid status url: {} status: {}", url, status);
                 return;
             }
 
