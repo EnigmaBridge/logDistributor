@@ -49,9 +49,6 @@ public class LogicManager {
     private Router router;
 
     @Autowired
-    private Server server;
-
-    @Autowired
     private DbHelper dbHelper;
 
     @Autowired
