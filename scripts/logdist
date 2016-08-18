@@ -21,7 +21,8 @@ echoGreen() { echo -e "${green}$1${reset}"; }
 echoYellow() { echo -e "${yellow}$1${reset}"; }
 
 start() {
-  PID=`$DAEMON $ARGS > /dev/null 2>&1 & echo $!`
+  PID=`nohup $DAEMON $ARGS 2> /dev/null > /dev/null & echo $!`
+  #PID=`$DAEMON $ARGS > /dev/null 2>&1 & echo $!`
 }
 
 case "$1" in
