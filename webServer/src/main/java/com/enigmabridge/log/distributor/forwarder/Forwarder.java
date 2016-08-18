@@ -1,5 +1,6 @@
 package com.enigmabridge.log.distributor.forwarder;
 
+import com.enigmabridge.log.distributor.Stats;
 import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.LogstashConfig;
 import com.enigmabridge.log.distributor.db.model.SplunkConfig;
@@ -8,6 +9,7 @@ import com.enigmabridge.log.distributor.forwarder.splunk.EBSplunkHandler;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,9 @@ public class Forwarder {
      * Client this forwarder is dedicated to.
      */
     protected Client client;
+
+    @Autowired
+    private Stats stats;
 
     /**
      * Underlying forwarder instance
@@ -212,6 +217,7 @@ public class Forwarder {
             return;
         }
 
+        stats.incLogLinesForwarded();
         clientForwarder.publish(msg);
     }
 

@@ -1,6 +1,7 @@
 package com.enigmabridge.log.distributor.listener;
 
 import com.enigmabridge.log.distributor.LogConstants;
+import com.enigmabridge.log.distributor.Stats;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.forwarder.Router;
 import org.json.JSONObject;
@@ -42,6 +43,9 @@ public class LogInputProcessor extends Thread {
     @Autowired
     protected Router router;
 
+    @Autowired
+    private Stats stats;
+
     public LogInputProcessor() {
     }
 
@@ -71,9 +75,11 @@ public class LogInputProcessor extends Thread {
             for(;parent.isRunning() && !clientSocket.isClosed() && !clientSocket.isInputShutdown();){
                 final String jsonLine = bufferedInput.readLine();
                 if (jsonLine == null){
+                    stats.incTcpClosed();
                     break;
                 }
 
+                stats.incLogLinesProcessed();
                 try {
                     final JSONObject jsonObject = Utils.parseJSON(jsonLine);
                     if (!jsonObject.has(LogConstants.FIELD_DETAILS)){

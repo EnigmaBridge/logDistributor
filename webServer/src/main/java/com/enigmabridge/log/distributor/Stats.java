@@ -15,7 +15,17 @@ public class Stats {
     private final AtomicLong numHostResync = new AtomicLong(0);
     private final AtomicLong numUOAdded = new AtomicLong(0);
     private final AtomicLong numUORemoved = new AtomicLong(0);
+    private final AtomicLong numTcpConnections = new AtomicLong(0);
+    private final AtomicLong numTcpClosed = new AtomicLong(0);
+    private final AtomicLong numTcpCurrent = new AtomicLong(0);
+    private final AtomicLong numLogLinesProcessed = new AtomicLong(0);
+    private final AtomicLong numLogLinesForwarded = new AtomicLong(0);
+
     private long lastHostResync = 0;
+    private long lastTcpConnection = 0;
+    private long lastTcpClosed = 0;
+    private long lastLoglineProcessed = 0;
+    private long lastLoglineForwarded = 0;
 
     public void incReloads(){
         numReloads.incrementAndGet();
@@ -33,6 +43,25 @@ public class Stats {
     public void incUORemoved(int removed){
         numReloads.addAndGet(removed);
     }
+    public void incTcpConnections(){
+        numTcpConnections.incrementAndGet();
+        numTcpCurrent.incrementAndGet();
+        lastTcpConnection = System.currentTimeMillis();
+    }
+    public void incTcpClosed(){
+        numTcpClosed.incrementAndGet();
+        numTcpCurrent.decrementAndGet();
+        lastTcpClosed = System.currentTimeMillis();
+    }
+    public void incLogLinesProcessed(){
+        numLogLinesProcessed.incrementAndGet();
+        lastLoglineProcessed = System.currentTimeMillis();
+    }
+    public void incLogLinesForwarded(){
+        numLogLinesForwarded.incrementAndGet();
+        lastLoglineForwarded = System.currentTimeMillis();
+    }
+
 
 
     public AtomicLong getNumReloads() {

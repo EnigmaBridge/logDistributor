@@ -1,9 +1,11 @@
 package com.enigmabridge.log.distributor.listener;
 
+import com.enigmabridge.log.distributor.Stats;
 import com.enigmabridge.log.distributor.Utils;
 import com.enigmabridge.log.distributor.api.ApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -34,6 +36,9 @@ public class LogInputListener extends Thread {
 
     @Value("${listener.port}")
     protected int listenPort = 8999;
+
+    @Autowired
+    private Stats stats;
 
     /**
      * Server is running flag.
@@ -66,6 +71,7 @@ public class LogInputListener extends Thread {
                 try {
                     final Socket clientSocket = listenSocket.accept();
                     LOG.debug("User connected: {}", clientSocket.getRemoteSocketAddress());
+                    stats.incTcpConnections();
 
                     // Start new connection socket.
                     final LogInputProcessor c = newProcessor();
