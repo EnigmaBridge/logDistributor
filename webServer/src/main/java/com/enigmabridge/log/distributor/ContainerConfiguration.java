@@ -14,6 +14,7 @@ import org.springframework.context.annotation.DependsOn;
 import java.io.File;
 
 @Configuration
+@DependsOn(value = ApiConfig.YAML_CONFIG)
 public class ContainerConfiguration {
     private final static Logger LOG = LoggerFactory.getLogger(ContainerConfiguration.class);
 

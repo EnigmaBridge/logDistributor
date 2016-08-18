@@ -67,6 +67,13 @@ class PropertiesConfiguration {
             return propertySourcesPlaceholderConfigurer;
         }
 
+        // Log which file was actually used.
+        try {
+            LOG.info("Using config file: {}", resource.get().getFile());
+        } catch (Exception e) {
+            LOG.error("Could not get file info", e);
+        }
+
         yaml.setResources(resource.get());
         propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
         return propertySourcesPlaceholderConfigurer;
