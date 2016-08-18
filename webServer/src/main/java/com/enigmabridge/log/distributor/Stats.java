@@ -87,4 +87,40 @@ public class Stats {
     public long getLastHostResync() {
         return lastHostResync;
     }
+
+    public AtomicLong getNumTcpConnections() {
+        return numTcpConnections;
+    }
+
+    public AtomicLong getNumTcpClosed() {
+        return numTcpClosed;
+    }
+
+    public AtomicLong getNumTcpCurrent() {
+        return numTcpCurrent;
+    }
+
+    public AtomicLong getNumLogLinesProcessed() {
+        return numLogLinesProcessed;
+    }
+
+    public AtomicLong getNumLogLinesForwarded() {
+        return numLogLinesForwarded;
+    }
+
+    public long getLastTcpConnection() {
+        return lastTcpConnection;
+    }
+
+    public long getLastTcpClosed() {
+        return lastTcpClosed;
+    }
+
+    public long getLastLoglineProcessed() {
+        return lastLoglineProcessed;
+    }
+
+    public long getLastLoglineForwarded() {
+        return lastLoglineForwarded;
+    }
 }
