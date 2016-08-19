@@ -32,10 +32,10 @@ class PropertiesConfiguration {
     private final static String[] PROPERTIES_FILENAMES = {"default.properties"};
     private static final String CONFIG_FILE_NAME = "appConfig.yml";
 
-    @Value("${properties.location:}")
+    @Value("${properties.location}")
     private String propertiesLocation;
 
-    @Value("${config.location:}")
+    @Value("${config.location}")
     private String configLocation;
 
     @Deprecated
@@ -71,17 +71,19 @@ class PropertiesConfiguration {
 
         // Locate YAML
         final YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        final String candidateFile = getCustomConfigPath();
+        LOG.info("Candidate YML config {}", candidateFile);
+
         final Resource[] possiblePropertiesResources = {
-                new PathResource(getCustomConfigPath()),
-                new PathResource("/etc/logdist/" + CONFIG_FILE_NAME),
+                new PathResource(candidateFile),
                 new PathResource("config/" + CONFIG_FILE_NAME),
                 new PathResource(CONFIG_FILE_NAME),
                 new ClassPathResource(CONFIG_FILE_NAME)
         };
         final Optional<Resource> resource =
                 stream(possiblePropertiesResources)
-                .filter(Resource::exists)
-                .reduce((previous, current) -> current);
+                        .filter(Resource::exists)
+                        .reduce((previous, current) -> current);
 
         if (!resource.isPresent()){
             return propConfig;
@@ -137,10 +139,19 @@ class PropertiesConfiguration {
     }
 
     private String getCustomConfigPath() {
-        if (configLocation == null){
+        final String systemLoc = System.getProperty("config.location");
+        if (systemLoc != null){
+            return getCustomWithPath(systemLoc);
+        }
+
+        return getCustomWithPath(configLocation);
+    }
+
+    private String getCustomWithPath(String path){
+        if (path == null){
             return CONFIG_FILE_NAME;
         }
-        return configLocation.endsWith(".yml") ? configLocation : configLocation + "/" + CONFIG_FILE_NAME;
+        return path.endsWith(".yml") ? path : path + "/" + CONFIG_FILE_NAME;
     }
 
 }
