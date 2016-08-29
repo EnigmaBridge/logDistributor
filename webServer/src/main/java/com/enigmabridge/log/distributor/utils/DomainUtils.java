@@ -33,6 +33,12 @@ public class DomainUtils {
             return detailsDomain.get().toLowerCase();
         }
 
+        // {"domain":"ddd"}
+        final Optional<String> domain = Utils.getAsString(msg, LogConstants.FIELD_DOMAIN);
+        if (domain.isPresent()){
+            return domain.get().toLowerCase();
+        }
+
         return getDomain(msg.getString(LogConstants.FIELD_SERVER));
     }
 
