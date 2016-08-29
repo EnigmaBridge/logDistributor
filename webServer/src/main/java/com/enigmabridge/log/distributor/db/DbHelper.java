@@ -1,13 +1,11 @@
 package com.enigmabridge.log.distributor.db;
 
 import com.enigmabridge.log.distributor.LogConstants;
+import com.enigmabridge.log.distributor.db.dao.ApiKey2ClientDao;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.DomainDao;
 import com.enigmabridge.log.distributor.db.dao.EBHostDao;
-import com.enigmabridge.log.distributor.db.model.Client;
-import com.enigmabridge.log.distributor.db.model.DBID;
-import com.enigmabridge.log.distributor.db.model.Domain;
-import com.enigmabridge.log.distributor.db.model.EBHost;
+import com.enigmabridge.log.distributor.db.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -37,6 +35,9 @@ public class DbHelper {
 
     @Autowired
     private EBHostDao hostDao;
+
+    @Autowired
+    private ApiKey2ClientDao apikey2ClientDao;
 
     @Autowired
     private EntityManager entityManager;
@@ -110,6 +111,10 @@ public class DbHelper {
 
     public Iterable<Client> findAllClients() {
         return clientDao.findAll();
+    }
+
+    public Iterable<ApiKey2Client> findAllApiMappings() {
+        return apikey2ClientDao.findAll();
     }
 
     /**

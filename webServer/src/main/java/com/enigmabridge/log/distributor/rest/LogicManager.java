@@ -9,6 +9,7 @@ import com.enigmabridge.log.distributor.db.ClientBuilder;
 import com.enigmabridge.log.distributor.db.DbHelper;
 import com.enigmabridge.log.distributor.db.dao.ClientDao;
 import com.enigmabridge.log.distributor.db.dao.UserObjectDao;
+import com.enigmabridge.log.distributor.db.model.ApiKey2Client;
 import com.enigmabridge.log.distributor.db.model.Client;
 import com.enigmabridge.log.distributor.db.model.UserObject;
 import com.enigmabridge.log.distributor.forwarder.Router;
@@ -58,23 +59,16 @@ public class LogicManager {
     private EntityManager em;
 
     /**
-     * Accepts configuration from the site server.
+     * Load mapping:
+     * (domain, apiKey) -&gt; client
      *
-     * http://site2.enigmabridge.com:12000/1.0/testAPI/GetAllAPIKeys/sdfgsgf
-     * {"function":"GetAllAPIKeys","result":{"API_TEST":{"use":[16,17,...,39030],"domain":"DEVELOPMENT","manage":[]}},"status":"9000","statusdetail":"success (ok)","version":"1.0"}
+     * In current DB model we load all user object grouped by clients.
+     * This minimizes data to be read.
      *
-     * @param jsonStr json string to process
-     * @return response
+     * @return map
      */
     @Transactional
-    @RequestMapping(value = ApiConfig.API_PATH + "/client/site/configure", method = RequestMethod.POST)
-    public GeneralResponse processSiteDump(@RequestBody String jsonStr){
-        final String FIELD_RESULT = "result";
-        final String FIELD_DOMAIN = "domain";
-        final String FIELD_USE = "use";
-
-        final LogResponse resp = new LogResponse();
-
+    public Map<String, Map<String, Client>> loadDomainClientMapping(){
         // Load mapping:
         // (domain, apiKey) -> client
         //
@@ -93,6 +87,41 @@ public class LogicManager {
             domainApiClient.putIfAbsent(domain, new HashMap<>());
             domainApiClient.get(domain).put(apiKey, uo.getClient());
         }
+
+        // Load additional mapping using ApiKey2client
+        final Iterable<ApiKey2Client> apiMappings = dbHelper.findAllApiMappings();
+        for (ApiKey2Client apiMapping : apiMappings) {
+            final String apiKey = apiMapping.getApiKey();
+            final Client client = apiMapping.getClient();
+            final String domain = DomainUtils.sanitize(client.getDomain().getDomain());
+
+            domainApiClient.putIfAbsent(domain, new HashMap<>());
+            domainApiClient.get(domain).put(apiKey, client);
+        }
+
+        return domainApiClient;
+    }
+
+    /**
+     * Accepts configuration from the site server.
+     *
+     * http://site2.enigmabridge.com:12000/1.0/testAPI/GetAllAPIKeys/sdfgsgf
+     * {"function":"GetAllAPIKeys","result":{"API_TEST":{"use":[16,17,...,39030],"domain":"DEVELOPMENT","manage":[]}},"status":"9000","statusdetail":"success (ok)","version":"1.0"}
+     *
+     * @param jsonStr json string to process
+     * @return response
+     */
+    @Transactional
+    @RequestMapping(value = ApiConfig.API_PATH + "/client/site/configure", method = RequestMethod.POST)
+    public GeneralResponse processSiteDump(@RequestBody String jsonStr){
+        final String FIELD_RESULT = "result";
+        final String FIELD_DOMAIN = "domain";
+        final String FIELD_USE = "use";
+
+        final LogResponse resp = new LogResponse();
+
+        // Domain -> ApiKey -> Client
+        final Map<String, Map<String, Client>> domainApiClient = loadDomainClientMapping();
 
         // If (domain,apikey) -> client exists, update UOs for client.
         try {
