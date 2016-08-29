@@ -61,6 +61,13 @@ public class Server {
         }
     }
 
+    /**
+     * Performs actual host resync.
+     * Calls remote API http://site2.enigmabridge.com:12000/1.0/testAPI/GetAllAPIKeys/nonce
+     *
+     * @param host host to sync
+     * @throws IOException exception in case of http rest error
+     */
     protected void resyncHost(EBHost host) throws IOException {
         final String url = "http://" + host.getHostAddress() + ":12000/1.0/testAPI/GetAllAPIKeys/" + System.currentTimeMillis();
         try {
@@ -94,6 +101,7 @@ public class Server {
             logic.processSiteDump(body);
 
         } catch(Exception e){
+            stats.incHostResyncFailed();
             LOG.error("Exception in syncing host: " + url, e);
         }
     }
