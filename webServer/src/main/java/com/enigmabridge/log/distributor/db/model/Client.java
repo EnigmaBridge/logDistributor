@@ -78,6 +78,11 @@ public class Client implements DBID {
         uo.setClient(this);
     }
 
+    public void addApiKey(ApiKey2Client apiKey){
+        getApiKeys().add(apiKey);
+        apiKey.setClient(this);
+    }
+
     public void addObjects(Collection<UserObject> uos){
         for(UserObject uo : uos) {
             getObjects().add(uo);

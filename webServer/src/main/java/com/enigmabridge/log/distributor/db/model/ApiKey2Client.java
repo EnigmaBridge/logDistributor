@@ -30,6 +30,14 @@ public class ApiKey2Client implements DBID{
     @Column
     private String apiKey;
 
+    public ApiKey2Client() {
+    }
+
+    public ApiKey2Client(Client client, String apiKey) {
+        this.client = client;
+        this.apiKey = apiKey;
+    }
+
     public Integer getId() {
         return id;
     }

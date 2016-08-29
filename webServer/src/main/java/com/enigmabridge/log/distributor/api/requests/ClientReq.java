@@ -18,6 +18,8 @@ public class ClientReq {
 
     private List<UserObjectReq> objects;
 
+    private List<String> apiKeys;
+
     @JsonIgnore
     private boolean logstashConfigSet=false;
 
@@ -67,6 +69,14 @@ public class ClientReq {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public List<String> getApiKeys() {
+        return apiKeys;
+    }
+
+    public void setApiKeys(List<String> apiKeys) {
+        this.apiKeys = apiKeys;
     }
 
     @JsonIgnore

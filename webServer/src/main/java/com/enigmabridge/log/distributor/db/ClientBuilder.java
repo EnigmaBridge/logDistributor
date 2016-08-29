@@ -4,10 +4,7 @@ import com.enigmabridge.log.distributor.api.requests.ClientReq;
 import com.enigmabridge.log.distributor.api.requests.LogstashConfigReq;
 import com.enigmabridge.log.distributor.api.requests.SplunkConfigReq;
 import com.enigmabridge.log.distributor.api.requests.UserObjectReq;
-import com.enigmabridge.log.distributor.db.model.Client;
-import com.enigmabridge.log.distributor.db.model.LogstashConfig;
-import com.enigmabridge.log.distributor.db.model.SplunkConfig;
-import com.enigmabridge.log.distributor.db.model.UserObject;
+import com.enigmabridge.log.distributor.db.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +38,13 @@ public class ClientBuilder {
         if (objects != null && !objects.isEmpty()){
             for (UserObjectReq object : objects) {
                 cl.addObject(build(object));
+            }
+        }
+
+        final List<String> apiKeys = req.getApiKeys();
+        if (apiKeys != null && !apiKeys.isEmpty()){
+            for (String apiKey : apiKeys) {
+                cl.addApiKey(new ApiKey2Client(cl, apiKey));
             }
         }
 
