@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/logdist/</file>
         <append>true</append>
         <encoder>
             <Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n</Pattern>
@@ -9,12 +8,21 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>logdist-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>/var/log/logdist/logdist-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>60</maxHistory>
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
+    </appender>
+
+    <appender name="fileError" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/logdist/logdist-error.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n</Pattern>
+        </encoder>
+
     </appender>
 
     <logger name="org.springframework" level="info" additivity="false">
@@ -42,4 +50,10 @@
         <level value="INFO" />
         <appender-ref ref="file" />
     </root>
+
+    <root>
+        <level value="ERROR" />
+        <appender-ref ref="fileError" />
+    </root>
+
 </configuration>
