@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 #!/bin/bash
 
+##
+## Init.d script for logdistributor
+##
+
 START_SCRIPT="/opt/logdist/scripts/start.sh"
 PID_FILE="/var/run/logdist.pid" #{{ pid_file }}
 
