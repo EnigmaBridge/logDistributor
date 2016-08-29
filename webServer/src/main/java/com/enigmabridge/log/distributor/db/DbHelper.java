@@ -62,6 +62,8 @@ public class DbHelper {
             domain = LogConstants.DEFAULT_DOMAIN;
         }
 
+        domain = domain.toLowerCase();
+
         final Domain domain1 = domainDao.findByDomain(domain);
         if (domain1 != null || !createIfNotPresent){
             return domain1;

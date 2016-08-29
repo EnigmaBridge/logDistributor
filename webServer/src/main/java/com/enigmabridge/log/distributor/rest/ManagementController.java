@@ -195,10 +195,14 @@ public class ManagementController {
         final List<ClientReq> clientReqs = addClientReq.getClients();
         for (ClientReq clientReq : clientReqs) {
             final String clientId = clientReq.getClientId();
+            final String domain = clientReq.getDomain();
 
             try {
                 final Client dbClient = clientBuilder.build(clientReq);
-                final List<Client> deletedClients = clientDao.deleteByClientId(clientId);
+                if (domain != null){
+                    dbHelper.deleteClientsByClientIdAndDomain(clientId, domain);
+                }
+
                 clientDao.save(dbClient);
                 router.reload(clientDao.findAll());
 
